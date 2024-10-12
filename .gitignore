@@ -3,8 +3,9 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
+src/.backup/*.*
 src/generated/*.*
-src/ThemeDarkModeTraditional.h
+src/ThemeDarkModeTraditionalBuilder.h
 src/generated/TcmSimpleTest_menu.cpp
 src/generated/TcmSimpleTest_menu.h
 .pio/build/project.checksum

@@ -1,7 +1,8 @@
 /*
 // DESCRIPTION ********************************************************************************************************
-// STATUS_DATE : 2023-09-20
-// TcmSimpleTest_main.cpp
+//
+// STATUS_DATE : 2024-10-12
+// PublicSimple_main.cpp
 // IDE: PIO.
 // TARGET(s)	: VARIOUS
 //
@@ -9,7 +10,22 @@
 //
 // UI : TCMENU BY DAVE CHERRY et.al.
 //
-// KNOWN ISSUES :
+//	SUMMARY: 
+//		Simple tcMenu example available to run on  several target boards
+//		e.g. esp32-wroom, esp32-s3, mega2560. Mainly Lilygo esp32 boards. Refer to the following repos:
+//		https://github.com/AtmosphEng/PublicTcmSimple.git
+//		https://github.com/AtmosphEng/boards.git
+//
+//	FEATURES:
+//		tcMenu local user input via rotary encoder, or 2-buttons.
+//		tcMenu local user output on LCD.
+//		tcMenu remote UI via esp32 wifi
+//		tcMenu remote UI via 3-wire SerialX port
+//		ARDUINOOTA
+//
+//
+// KNOWN ISSUES: 
+//
 //  TARGET(s): lilygo-t7-s3
 //		T7-S3 ESP32-S3 USB CDC mode for Serial : -D ARDUINO_USB_MODE=1 : -D ARDUINO_USB_CDC_ON_BOOT=1 :
 //		PIO Serial Terminal does not show any Serial.print but RealTerm is OK
@@ -17,12 +33,12 @@
 //
 //	TARGET(s): lilygo-t-display-s3
 //		T-Display-S3 Compile Warning :
-//		Compiling .pio\build\lilygo-t-display-s3\src\TcmSimpleTest_menu.cpp.o
+//		Compiling .pio\build\lilygo-t-display-s3\src\PublicTcmSimple_menu.cpp.o
 //		In file included from .pio/libdeps/lilygo-t-display-s3/TFT_eSPI/TFT_eSPI.h:96,
 //	             from src/tcMenuTfteSpi.h:17,
-//               from src/TcmSimpleTest_menu.h:16,
+//               from src/PublicTcmSimple_menu.h:16,
 //               from src/src_menu.h:4,
-//               from src/TcmSimpleTest_main.cpp:1:
+//               from src/PublicTcmSimple_main.cpp:1:
 //		.pio/libdeps/lilygo-t-display-s3/TFT_eSPI/Processors/TFT_eSPI_ESP32_S3.h:110:3: warning:
 //		#warning >>>>------>> DMA is not supported in parallel mode [-Wcpp]
 //		#warning >>>>------>> DMA is not supported in parallel mode
@@ -39,10 +55,9 @@
 //		platformio.ini: build_flags: -D ARDUINO_USB_CDC_ON_BOOT=1 
 //		WORKAROUND : 2024-04-03 - 2024-10-10
 //		1) pin_config-t-display-esp32-s3.h : add : #define	MYSERIAL_BEGIN Serial.begin(BAUD_SERIAL, SERIAL_8N1, 43, 44);
-//		2) TcmSimpleTest_menu.cpp:25 : add cast : SerialTagValueTransport serialTransport((HardwareSerial*)&Serial);
+//		2) PublicTcmSimple_menu.cpp:25 : add cast : SerialTagValueTransport serialTransport((HardwareSerial*)&Serial);
 //		3) Use Realterm (optional) to check TCMENU RC HMI heartbeat messages on Serial at 115200 8-n-1 baud settings.
 //		4) Close Realterm (optional), reset target, run embedCONTROL and select Serial port.
-//
 //
 // DESCRIPTION ********************************************************************************************************
 */
@@ -431,3 +446,8 @@ void CALLBACK_FUNCTION onChangeTcmNeoPixelLedWhite(int id) {
 //
 // END_OF_FILE
 //
+
+
+void CALLBACK_FUNCTION onChangeTcmRestart(int id) {
+	ESP.restart();
+}
