@@ -3,7 +3,7 @@
 #ifndef MY_SRC_MENU_H
 #define MY_SRC_MENU_H
 
-#include "generated/TcmSimpleTest_menu.h"
+#include "generated/PublicTcmSimple_menu.h"
 
 #endif
 
