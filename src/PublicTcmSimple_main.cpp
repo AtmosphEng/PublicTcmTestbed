@@ -43,7 +43,7 @@
 //		#warning >>>>------>> DMA is not supported in parallel mode [-Wcpp]
 //		#warning >>>>------>> DMA is not supported in parallel mode
 //
-//		T-Display-S3 Compile Warning :
+//		Compile Warning : lilygo-t-display-s3 AND lilygo-t-embed-s3
 //		In file included from .pio/libdeps/lilygo-t-display-s3/TFT_eSPI/TFT_eSPI.cpp:16:
 //		.pio/libdeps/lilygo-t-display-s3/TFT_eSPI/TFT_eSPI.h:970:8: warning: #warning >>>>------>>
 //		TOUCH_CS pin not defined, TFT_eSPI touch functions will not be available! [-Wcpp]
@@ -183,6 +183,7 @@ void setup() {
 	MYSERIAL3_BEGIN;
 	delay(DEF_SERIAL_DELAY); // Need time here?
 #endif
+
 
 #ifdef INIDEF_LILYGO_T_EMBED_S3
   pinMode(PIN_POWER_ON, OUTPUT);
@@ -413,6 +414,12 @@ void CALLBACK_FUNCTION onChangeTcmTimeSec(int id) {
 void CALLBACK_FUNCTION onChangeTcmRefreshMenu(int id) { refreshMenu(); }
 
 
+void CALLBACK_FUNCTION onChangeTcmRestart(int id) {
+	ESP.restart();
+}
+
+
+
 #ifdef INIDEF_LILYGO_T_INTERNET_COM
 
 void CALLBACK_FUNCTION onChangeTcmNeoPixelLedOff(int id) {
@@ -446,8 +453,3 @@ void CALLBACK_FUNCTION onChangeTcmNeoPixelLedWhite(int id) {
 //
 // END_OF_FILE
 //
-
-
-void CALLBACK_FUNCTION onChangeTcmRestart(int id) {
-	ESP.restart();
-}

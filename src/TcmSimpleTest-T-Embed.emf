@@ -1,6 +1,6 @@
 {
   "version": "1.00",
-  "projectName": "TcmSimpleTest-T-Embed\n",
+  "projectName": "embedCONTROL: WIFI",
   "author": "david",
   "items": [
     {
@@ -14,23 +14,6 @@
         "id": 5,
         "eepromAddress": -1,
         "functionName": "onChangeTcmDebugLED",
-        "readOnly": false,
-        "localOnly": false,
-        "visible": true,
-        "staticDataInRAM": false
-      }
-    },
-    {
-      "parentId": 0,
-      "type": "boolItem",
-      "defaultValue": "false",
-      "item": {
-        "naming": "TRUE_FALSE",
-        "name": "RefreshMenu",
-        "variableName": "TcmRefreshMenu",
-        "id": 7,
-        "eepromAddress": -1,
-        "functionName": "onChangeTcmRefreshMenu",
         "readOnly": false,
         "localOnly": false,
         "visible": true,
@@ -141,6 +124,40 @@
         "visible": true,
         "staticDataInRAM": false
       }
+    },
+    {
+      "parentId": 0,
+      "type": "boolItem",
+      "defaultValue": "false",
+      "item": {
+        "naming": "TRUE_FALSE",
+        "name": "RefreshMenu",
+        "variableName": "TcmRefreshMenu",
+        "id": 7,
+        "eepromAddress": -1,
+        "functionName": "onChangeTcmRefreshMenu",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 0,
+      "type": "boolItem",
+      "defaultValue": "false",
+      "item": {
+        "naming": "TRUE_FALSE",
+        "name": "Restart",
+        "variableName": "TcmRestart",
+        "id": 8,
+        "eepromAddress": -1,
+        "functionName": "onChangeTcmRestart",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
     }
   ],
   "codeOptions": {
@@ -148,11 +165,11 @@
     "lastDisplayUuid": "e6342680-6fab-4d1b-ac08-ce8dbfc0974c",
     "lastInputUuid": "6dd87e7d-e751-4912-a70d-91793b1d3d87",
     "lastRemoteUuids": [
-      "2c101fec-1f7d-4ff3-8d2b-992ad41e7fcb"
+      "46c30011-cac6-4598-a7b8-b0630d55daab"
     ],
-    "lastThemeUuid": "e4524028-edd8-4e0a-ae15-a1f2ba05354f",
+    "lastThemeUuid": "2F1EAB1E-0469-42C8-A222-BE2DF96D6D81",
     "applicationUUID": "f1cdf4ed-8d8f-469e-b907-91c3e1536fab",
-    "applicationName": "TcmSim 240730 2100",
+    "applicationName": "PTcmSim 241013 2140",
     "lastProperties": [
       {
         "name": "DISPLAY_VARIABLE",
@@ -171,7 +188,7 @@
       },
       {
         "name": "UPDATES_PER_SEC",
-        "latestValue": "2",
+        "latestValue": "10",
         "subsystem": "DISPLAY"
       },
       {
@@ -280,6 +297,31 @@
         "subsystem": "INPUT"
       },
       {
+        "name": "ESPWIFI_CONCURRENT_CONNECTIONS",
+        "latestValue": "1",
+        "subsystem": "REMOTE"
+      },
+      {
+        "name": "ESPWIFI_LISTEN_PORT1",
+        "latestValue": "3333",
+        "subsystem": "REMOTE"
+      },
+      {
+        "name": "ESPWIFI_LISTEN_PORT2",
+        "latestValue": "3334",
+        "subsystem": "REMOTE"
+      },
+      {
+        "name": "ESPWIFI_LISTEN_PORT3",
+        "latestValue": "3335",
+        "subsystem": "REMOTE"
+      },
+      {
+        "name": "ESPWIFI_BUFFERED",
+        "latestValue": "true",
+        "subsystem": "REMOTE"
+      },
+      {
         "name": "ITEM_FONT",
         "latestValue": "def:,2",
         "subsystem": "THEME"
@@ -290,11 +332,6 @@
         "subsystem": "THEME"
       },
       {
-        "name": "BORDER_FOR_ACTIONS",
-        "latestValue": "0",
-        "subsystem": "THEME"
-      },
-      {
         "name": "TITLE_SHOW_MODE",
         "latestValue": "TITLE_FIRST_ROW",
         "subsystem": "THEME"
@@ -302,11 +339,6 @@
       {
         "name": "USE_TC_UNICODE",
         "latestValue": "false",
-        "subsystem": "THEME"
-      },
-      {
-        "name": "USE_SLIDER_ANALOG",
-        "latestValue": "true",
         "subsystem": "THEME"
       },
       {
