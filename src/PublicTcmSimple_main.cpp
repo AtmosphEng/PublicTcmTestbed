@@ -1,7 +1,6 @@
 /*
 // DESCRIPTION ********************************************************************************************************
 //
-// STATUS_DATE : 2024-10-12
 // PublicSimple_main.cpp
 // IDE: PIO.
 // TARGET(s)	: VARIOUS
@@ -49,13 +48,16 @@
 //		TOUCH_CS pin not defined, TFT_eSPI touch functions will not be available! [-Wcpp]
 //		#warning >>>>------>> TOUCH_CS pin not defined, TFT_eSPI touch functions will not be available!
 //
+//	TARGET(s): lilygo-t-embed-s3
+//		The t-embed serial port on GROVE conn. is NOT currently working w. embedCONTROL. However, Serial is OK.
+//
 //	TARGET(s): ALL esp32-s3
 //		TCMENU RC w. embedCONTROL not working on Serial with USB CDC mode e.g. 1x USB cable only for prog and debug.
 //		platformio.ini: build_flags: -D ARDUINO_USB_MODE=1 
 //		platformio.ini: build_flags: -D ARDUINO_USB_CDC_ON_BOOT=1 
 //		WORKAROUND : 2024-04-03 - 2024-10-10
 //		1) pin_config-t-display-esp32-s3.h : add : #define	MYSERIAL_BEGIN Serial.begin(BAUD_SERIAL, SERIAL_8N1, 43, 44);
-//		2) PublicTcmSimple_menu.cpp:25 : add cast : SerialTagValueTransport serialTransport((HardwareSerial*)&Serial);
+//		2) PublicTcmSimple_menu.cpp:25 : add cast : SerialTagValueTransport serialTransport( (HardwareSerial*) &Serial);
 //		3) Use Realterm (optional) to check TCMENU RC HMI heartbeat messages on Serial at 115200 8-n-1 baud settings.
 //		4) Close Realterm (optional), reset target, run embedCONTROL and select Serial port.
 //
@@ -90,6 +92,9 @@ uint32_t colors[] = {0x000000, 0xFF0000, 0x00FF00, 0x0000FF, 0xFFFFFF}; // Off, 
 
 #ifdef INIDEF_LILYGO_T_EMBED_S3
 #include "pin_config-t-embed-esp32-s3.h" // SPI data LCD interface
+
+#include "APA102.h"
+APA102<PIN_APA102_DI, PIN_APA102_CLK> ledStrip; // t-embed builtin RGB_LED
 #endif
 
 #ifdef INIDEF_LILYGO_T7_S3
@@ -157,6 +162,29 @@ void refreshMenu(void) {
 	menuTcmDebugLED.setSendRemoteNeededAll();
 }
 
+#ifdef INIDEF_LILYGO_T_EMBED_S3
+/* Converts a color from HSV to RGB.
+ * h is hue, as a number between 0 and 360.
+ * s is the saturation, as a number between 0 and 255.
+ * v is the value, as a number between 0 and 255. */
+rgb_color hsvToRgb(uint16_t h, uint8_t s, uint8_t v)
+{
+    uint8_t f = (h % 60) * 255 / 60;
+    uint8_t p = (255 - s) * (uint16_t)v / 255;
+    uint8_t q = (255 - f * (uint16_t)s / 255) * (uint16_t)v / 255;
+    uint8_t t = (255 - (255 - f) * (uint16_t)s / 255) * (uint16_t)v / 255;
+    uint8_t r = 0, g = 0, b = 0;
+    switch((h / 60) % 6){
+        case 0: r = v; g = t; b = p; break;
+        case 1: r = q; g = v; b = p; break;
+        case 2: r = p; g = v; b = t; break;
+        case 3: r = p; g = q; b = v; break;
+        case 4: r = t; g = p; b = v; break;
+        case 5: r = v; g = p; b = q; break;
+    }
+    return rgb_color(r, g, b);
+}
+#endif
 
 //
 void setup() {
@@ -164,8 +192,19 @@ void setup() {
 	Serial.begin(BAUD_SERIAL1);
 	delay(100); // Need time here?
 
-	Serial.println("Serial begin ok. line 1");
-	Serial.println("Serial begin ok. line 2");
+
+#if(0)
+	int incomingByte = 0; // For dumping unwanted initial ESP serial boot message.
+	Serial0.begin(BAUD_SERIAL0); // AAATEMP
+	delay(100); // Need time here?
+	if (Serial0.available() > 0) {
+  // read and DUMP the incoming byte:
+  incomingByte = Serial.read();
+	}
+#endif
+
+//	Serial.println("Serial begin ok. line 1");
+//	Serial.println("Serial begin ok. line 2");
 
 #ifdef MYSERIAL0_BEGIN
 	MYSERIAL0_BEGIN;
@@ -199,7 +238,7 @@ void setup() {
 	WiFi.begin(ssid, pw);
 	delay(2000); // THIS DELAY IS VERY IMPORTANT : comment from AlphaLima www.LK8000.com ? AAAMAGIC
 
-#if(1)
+#if(0)
 	Serial.print("ESP Board MAC Address:  "); // 2024-04-05 testing for wifi on t-display-s3
   Serial.println(WiFi.macAddress());
 #endif
@@ -402,11 +441,47 @@ void CALLBACK_FUNCTION onChangeTcmBaseCCW(int id) {
 void CALLBACK_FUNCTION onChangeTcmBaseTCW(int id) {
 }
 
-void CALLBACK_FUNCTION onChangeTcmDebugLED(int id) {
-#ifndef INIDEF_LILYGO_T_INTERNET_COM
+void CALLBACK_FUNCTION onChangeTcmDebugLED(int id) { // AAAFIXME for INIDEF_LILYGO_T_INTERNET_COM
+
+#if(0) // from github lilygo t-embed examples/led/led.ino 
+  const uint8_t ledSort[7] = {2, 1, 0, 6, 5, 4, 3};
+  // Set the number of LEDs to control.
+  const uint16_t ledCount = 7;
+  
+	for(int i = 0; i < 1000; i++) {
+	// Create a buffer for holding the colors (3 bytes per color).
+  rgb_color colors[ledCount];
+  // Set the brightness to use (the maximum is 31).
+  uint8_t brightness = 1;
+  static uint64_t time;
+  time++;
+  for (uint16_t i = 0; i < ledCount; i++) {
+    colors[i] = hsvToRgb((uint32_t)time * 359 / 256, 255, 255);
+  }
+  ledStrip.write(colors, ledCount, brightness);
+  delay(10);
+	}
+#endif
+
+#ifdef INIDEF_LILYGO_T_EMBED_S3
+  const uint16_t ledCount = 1;
+	// Create a buffer for holding the colors (3 bytes per color).
+  rgb_color colors[ledCount];
+	if(menuTcmDebugLED.getBoolean()){
+  	colors[0] = {64, 64, 64};
+	}
+	else {
+	  colors[0] = {0, 0 ,0};
+	}
+  // Set the brightness to use (the maximum is 31).
+  uint8_t brightness = 1;
+	ledStrip.write(colors, ledCount, brightness);
+
+#else
 	digitalWrite(PIN_DEBUG_LED, menuTcmDebugLED.getBoolean()); // Menu selection default toggles this boolean value.
 #endif
 }
+
 
 void CALLBACK_FUNCTION onChangeTcmTimeSec(int id) {
 }
@@ -417,7 +492,6 @@ void CALLBACK_FUNCTION onChangeTcmRefreshMenu(int id) { refreshMenu(); }
 void CALLBACK_FUNCTION onChangeTcmRestart(int id) {
 	ESP.restart();
 }
-
 
 
 #ifdef INIDEF_LILYGO_T_INTERNET_COM
@@ -453,3 +527,4 @@ void CALLBACK_FUNCTION onChangeTcmNeoPixelLedWhite(int id) {
 //
 // END_OF_FILE
 //
+
