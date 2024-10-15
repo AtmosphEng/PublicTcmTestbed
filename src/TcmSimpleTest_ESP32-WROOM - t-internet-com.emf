@@ -1,6 +1,6 @@
 {
   "version": "1.00",
-  "projectName": "TcmSimpleTest_ESP32-WROOM - t-internet-com\nembedControl : Serial1 115200 8-n-1",
+  "projectName": "embedControl : Serial",
   "author": "david",
   "items": [
     {
@@ -209,6 +209,23 @@
         "visible": true,
         "staticDataInRAM": false
       }
+    },
+    {
+      "parentId": 0,
+      "type": "boolItem",
+      "defaultValue": "false",
+      "item": {
+        "naming": "TRUE_FALSE",
+        "name": "Restart",
+        "variableName": "TcmRestart",
+        "id": 12,
+        "eepromAddress": -1,
+        "functionName": "onChangeTcmRestart",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
     }
   ],
   "codeOptions": {
@@ -216,19 +233,45 @@
     "lastDisplayUuid": "cdd0be35-f6ff-40ae-86fc-f9d04a6e8679",
     "lastInputUuid": "89cd7f70-0457-4884-97c2-0db904ccb0ba",
     "lastRemoteUuids": [
-      "ba23b2a7-040e-40e2-8fae-d45c82cf450b"
+      "ba23b2a7-040e-40e2-8fae-d45c82cf450b",
+      "46c30011-cac6-4598-a7b8-b0630d55daab"
     ],
     "lastThemeUuid": "e4524028-edd8-4e0a-ae15-a1f2ba05354f",
     "applicationUUID": "f1cdf4ed-8d8f-469e-b907-91c3e1536fab",
-    "applicationName": "TcmSim 231112 1820",
+    "applicationName": "PTcmSim 20241015 2119",
     "lastProperties": [
       {
         "name": "SERIAL_PORT",
-        "latestValue": "Serial1",
+        "latestValue": "Serial",
         "subsystem": "REMOTE"
       },
       {
         "name": "HARDWARE_PORT",
+        "latestValue": "true",
+        "subsystem": "REMOTE"
+      },
+      {
+        "name": "ESPWIFI_CONCURRENT_CONNECTIONS",
+        "latestValue": "1",
+        "subsystem": "REMOTE"
+      },
+      {
+        "name": "ESPWIFI_LISTEN_PORT1",
+        "latestValue": "3333",
+        "subsystem": "REMOTE"
+      },
+      {
+        "name": "ESPWIFI_LISTEN_PORT2",
+        "latestValue": "3334",
+        "subsystem": "REMOTE"
+      },
+      {
+        "name": "ESPWIFI_LISTEN_PORT3",
+        "latestValue": "3335",
+        "subsystem": "REMOTE"
+      },
+      {
+        "name": "ESPWIFI_BUFFERED",
         "latestValue": "true",
         "subsystem": "REMOTE"
       },
@@ -270,7 +313,7 @@
     ],
     "namingRecursive": true,
     "useCppMain": true,
-    "saveLocation": "ALL_TO_CURRENT",
+    "saveLocation": "PROJECT_TO_CURRENT_WITH_GENERATED",
     "usingSizedEEPROMStorage": false,
     "eepromDefinition": "",
     "authenticatorDefinition": "",
@@ -281,7 +324,8 @@
       "menuDefinitions": []
     },
     "packageNamespace": "",
-    "appIsModular": false
+    "appIsModular": false,
+    "listOfEmbeddedForms": []
   },
   "stringLists": []
 }

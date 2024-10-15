@@ -49,7 +49,10 @@
 //		#warning >>>>------>> TOUCH_CS pin not defined, TFT_eSPI touch functions will not be available!
 //
 //	TARGET(s): lilygo-t-embed-s3
-//		The t-embed serial port on GROVE conn. is NOT currently working w. embedCONTROL. However, Serial is OK.
+//		The t-embed serial port on GROVE conn. is NOT currently working w. embedCONTROL. However, (USB) Serial is OK.
+//
+//	TARGET(s): esp32dev_t_internet_com
+//		tcMenu embedCONTROL: all ports working (Serial, Serial1, Serial2, Wifi) except wired Ethernet.
 //
 //	TARGET(s): ALL esp32-s3
 //		TCMENU RC w. embedCONTROL not working on Serial with USB CDC mode e.g. 1x USB cable only for prog and debug.
@@ -186,6 +189,64 @@ rgb_color hsvToRgb(uint16_t h, uint8_t s, uint8_t v)
 }
 #endif
 
+
+void debugLED(bool state) {
+
+#if(0) // from github lilygo t-embed examples/led/led.ino 
+  const uint8_t ledSort[7] = {2, 1, 0, 6, 5, 4, 3};
+  // Set the number of LEDs to control.
+  const uint16_t ledCount = 7;
+  
+	for(int i = 0; i < 1000; i++) {
+	// Create a buffer for holding the colors (3 bytes per color).
+  rgb_color colors[ledCount];
+  // Set the brightness to use (the maximum is 31).
+  uint8_t brightness = 1;
+  static uint64_t time;
+  time++;
+  for (uint16_t i = 0; i < ledCount; i++) {
+    colors[i] = hsvToRgb((uint32_t)time * 359 / 256, 255, 255);
+  }
+  ledStrip.write(colors, ledCount, brightness);
+  delay(10);
+	}
+#endif
+
+#ifdef INIDEF_LILYGO_T_EMBED_S3 // APA102 RGBLEDs
+  const uint16_t ledCount = 1;
+	// Create a buffer for holding the colors (3 bytes per color).
+  rgb_color colors[ledCount];
+	if(state){
+  	colors[0] = {64, 64, 64};
+	}
+	else {
+	  colors[0] = {0, 0 ,0};
+	}
+  // Set the brightness to use (the maximum is 31).
+  uint8_t brightness = 1;
+	ledStrip.write(colors, ledCount, brightness);
+
+#else
+
+#ifdef INIDEF_LILYGO_T_INTERNET_COM // NeoPixel RGBLED
+
+	if(state) {
+		pixels.setPixelColor(0, colors[3]); // blue (on).
+	}
+	else {
+		pixels.setPixelColor(0, colors[0]); // black (off).
+	}
+	pixels.show();
+
+#else
+	digitalWrite(PIN_DEBUG_LED, state); // Menu selection default toggles this boolean value.
+#endif
+
+#endif
+
+}
+
+
 //
 void setup() {
 
@@ -195,7 +256,7 @@ void setup() {
 
 #if(0)
 	int incomingByte = 0; // For dumping unwanted initial ESP serial boot message.
-	Serial0.begin(BAUD_SERIAL0); // AAATEMP
+	Serial0.begin(BAUD_SERIAL0);
 	delay(100); // Need time here?
 	if (Serial0.available() > 0) {
   // read and DUMP the incoming byte:
@@ -232,11 +293,13 @@ void setup() {
   digitalWrite(PIN_LCD_BL, HIGH);
 #endif
 
+#define ALPHALIMA_DELAY_MS 2000
+
 #ifdef INIDEF_WIFI_STA
 	WiFi.mode(WIFI_STA);
 	WiFi.config(ip_static, ip_gway, netmask);
 	WiFi.begin(ssid, pw);
-	delay(2000); // THIS DELAY IS VERY IMPORTANT : comment from AlphaLima www.LK8000.com ? AAAMAGIC
+	delay(ALPHALIMA_DELAY_MS); // THIS DELAY IS VERY IMPORTANT : comment from AlphaLima www.LK8000.com ?
 
 #if(0)
 	Serial.print("ESP Board MAC Address:  "); // 2024-04-05 testing for wifi on t-display-s3
@@ -248,7 +311,7 @@ void setup() {
 #ifdef INIDEF_WIFI_AP // ESP32 WIFI ACCESS POINT
 	WiFi.mode(WIFI_AP);
 	WiFi.softAP(ssid, pw); // configure ssid and password for softAP
-	delay(2000);					 // THIS DELAY IS VERY IMPORTANT : comment from AlphaLima www.LK8000.com ? AAAMAGIC
+	delay(ALPHALIMA_DELAY_MS); // THIS DELAY IS VERY IMPORTANT : comment from AlphaLima www.LK8000.com ?
 	WiFi.softAPConfig(ip_static, ip_gway, netmask); // IP_AP, IP_GATEWAY, MASK. configure ip address for softAP
 #endif
 
@@ -257,19 +320,18 @@ void setup() {
 	pixels.begin();										// INITIALIZE NeoPixel strip object (REQUIRED)
 	pixels.show();										// Turn OFF all pixels ASAP
 	pixels.setBrightness(LED_BRIGHTNESS);
-
 #else
 	pinMode(PIN_DEBUG_LED, OUTPUT); // Common LED name for all targets / controllers. Assign I/O mode to pin.
 #endif
 
-
-  digitalWrite(PIN_DEBUG_LED, 1); // Basic check if program is running here.
+	debugLED(true); // simple setup routine to provide a double flash of debugLED type installed on target board.
 	delay(DEF_LED_DELAY);	
-  digitalWrite(PIN_DEBUG_LED, 0); // Basic check if program is running here.
+	debugLED(false);
 	delay(DEF_LED_DELAY);	
-  digitalWrite(PIN_DEBUG_LED, 1); // Basic check if program is running here.
+	debugLED(true);
 	delay(DEF_LED_DELAY);	
-  digitalWrite(PIN_DEBUG_LED, 0); // Basic check if program is running here. Even number of ops restores orig state.
+	debugLED(false);
+	delay(DEF_LED_DELAY);	
 
 #ifdef INIDEF_LILYGO_T_DISPLAY_S3
 	pinMode(PIN_POWER_ON, OUTPUT);
@@ -293,7 +355,7 @@ void setup() {
 	digitalWrite(PIN_DUMMY_GROUND_D20, LOW); // Belt and braces.
 
 #if (1)
-	digitalWrite(53, OUTPUT); // AAAMAGIC AAAA Mega Slave Select (SS)
+	digitalWrite(IO_PIN_53, OUTPUT); // Mega Slave Select (SS)
 
 	// first encoder - encoder0 - slot 0 - for menu navigation
 	digitalWrite(PIN_DUMMY_5V0_A12, HIGH); // For wiring convenience on Mega for rotary encoder VCC 5V0 on 5-pin header
@@ -441,45 +503,8 @@ void CALLBACK_FUNCTION onChangeTcmBaseCCW(int id) {
 void CALLBACK_FUNCTION onChangeTcmBaseTCW(int id) {
 }
 
-void CALLBACK_FUNCTION onChangeTcmDebugLED(int id) { // AAAFIXME for INIDEF_LILYGO_T_INTERNET_COM
-
-#if(0) // from github lilygo t-embed examples/led/led.ino 
-  const uint8_t ledSort[7] = {2, 1, 0, 6, 5, 4, 3};
-  // Set the number of LEDs to control.
-  const uint16_t ledCount = 7;
-  
-	for(int i = 0; i < 1000; i++) {
-	// Create a buffer for holding the colors (3 bytes per color).
-  rgb_color colors[ledCount];
-  // Set the brightness to use (the maximum is 31).
-  uint8_t brightness = 1;
-  static uint64_t time;
-  time++;
-  for (uint16_t i = 0; i < ledCount; i++) {
-    colors[i] = hsvToRgb((uint32_t)time * 359 / 256, 255, 255);
-  }
-  ledStrip.write(colors, ledCount, brightness);
-  delay(10);
-	}
-#endif
-
-#ifdef INIDEF_LILYGO_T_EMBED_S3
-  const uint16_t ledCount = 1;
-	// Create a buffer for holding the colors (3 bytes per color).
-  rgb_color colors[ledCount];
-	if(menuTcmDebugLED.getBoolean()){
-  	colors[0] = {64, 64, 64};
-	}
-	else {
-	  colors[0] = {0, 0 ,0};
-	}
-  // Set the brightness to use (the maximum is 31).
-  uint8_t brightness = 1;
-	ledStrip.write(colors, ledCount, brightness);
-
-#else
-	digitalWrite(PIN_DEBUG_LED, menuTcmDebugLED.getBoolean()); // Menu selection default toggles this boolean value.
-#endif
+void CALLBACK_FUNCTION onChangeTcmDebugLED(int id) {
+	debugLED(menuTcmDebugLED.getBoolean());
 }
 
 
