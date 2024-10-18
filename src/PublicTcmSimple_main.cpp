@@ -68,12 +68,15 @@
 */
 
 #include <Arduino.h>
+#include <SPI.h>
 
-#include "src_menu.h"
+#include "src_menu.h" // for tcMenu
+
+#include "Ethernet.h"
+
+#include <ETH.h>
 
 #include "..\..\Credentials\Credentials.h"
-
-#include "configWifi.h"
 
 #ifdef INIDEF_KEYESTUDIO_KS0413
 #include "pin_config-keyestudio-ESP32.h" // SPI data LCD interface
@@ -81,6 +84,7 @@
 
 #ifdef INIDEF_LILYGO_T_INTERNET_COM
 #include "pin_config-t-internet-com-ESP32.h"
+
 #include <Adafruit_NeoPixel.h>
 #define LED_COUNT			 1
 #define LED_BRIGHTNESS 1 // about 1/5 brightness (max = 255)
@@ -104,9 +108,7 @@ APA102<PIN_APA102_DI, PIN_APA102_CLK> ledStrip; // t-embed builtin RGB_LED
 #include "pin_config-t7-s3-esp32-s3.h"
 #endif
 
-
-#define MYSERIALX Serial // 2024-04-05 testing for t-display-s3 wifi from ssid AndroidAP
-//#define MYSERIALX Serial1
+#define MYSERIALX Serial1 // myDebug
 
 #ifdef INIDEF_ARDUINOOTA
 #include <ArduinoOTA.h>
@@ -116,6 +118,7 @@ APA102<PIN_APA102_DI, PIN_APA102_CLK> ledStrip; // t-embed builtin RGB_LED
 
 #ifdef ARDUINO_ARCH_AVR
 #define PIN_DUMMY_GROUND_D20	20 // For Mega wiring convenience of Serial1 cable.
+#define PIN_DUMMY_GROUND_D21	21 // For Mega wiring convenience of Serial2 cable.
 
 // encoder2 - for direct control of BaseTCW
 #define PIN_ENCODER2_CLK_D22	22
@@ -138,9 +141,9 @@ APA102<PIN_APA102_DI, PIN_APA102_CLK> ledStrip; // t-embed builtin RGB_LED
 // encoder0 - slot 0 - for menu navigation
 #define PIN_DUMMY_GROUND_A11	A11 // For Mega wiring convenience of rotary encoder.
 #define PIN_DUMMY_5V0_A12			A12 // For Mega wiring convenience of rotary encoder.
-#define PIN_ENCODER0_PBSW_A13 A13 // Assigned in tcmenu Designer Code Generator.
-#define PIN_ENCODER0_CLK_A14	A14 // Assigned in tcmenu Designer Code Generator.
-#define PIN_ENCODER0_DAT_A15	A15 // Assigned in tcmenu Designer Code Generator.
+//#define PIN_ENCODER0_PBSW_A13 A13 // Assigned in tcmenu Designer Code Generator.
+//#define PIN_ENCODER0_CLK_A14	A14 // Assigned in tcmenu Designer Code Generator.
+//#define PIN_ENCODER0_DAT_A15	A15 // Assigned in tcmenu Designer Code Generator.
 #endif														// ARDUINO_ARCH_AVR
 
 #define BAUD_SERIAL  (115200)
@@ -247,12 +250,58 @@ void debugLED(bool state) {
 }
 
 
+#ifdef INIDEF_LILYGO_T_INTERNET_COM
+#define TCP_SERVER_PORT     3333 // For tcmenu embedControl.
+
+//WiFiServer myServer(TCP_SERVER_PORT);
+static bool eth_connected = false;
+
+
+void WiFiEvent(WiFiEvent_t event)
+{
+    switch (event) {
+    case ARDUINO_EVENT_ETH_START:
+        MYSERIALX.println("ETH Started");
+        //set eth hostname here
+        ETH.setHostname("esp32-ethernet");
+        break;
+    case ARDUINO_EVENT_ETH_CONNECTED:
+        MYSERIALX.println("ETH Connected");
+        break;
+    case ARDUINO_EVENT_ETH_GOT_IP:
+        MYSERIALX.print("ETH MAC: ");
+        MYSERIALX.print(ETH.macAddress());
+        MYSERIALX.print(", IPv4: ");
+        MYSERIALX.print(ETH.localIP());
+        if (ETH.fullDuplex()) {
+            MYSERIALX.print(", FULL_DUPLEX");
+        }
+        MYSERIALX.print(", ");
+        MYSERIALX.print(ETH.linkSpeed());
+        MYSERIALX.println("Mbps");
+        eth_connected = true;
+        break;
+    case ARDUINO_EVENT_ETH_DISCONNECTED:
+        MYSERIALX.println("ETH Disconnected");
+        eth_connected = false;
+        break;
+    case ARDUINO_EVENT_ETH_STOP:
+        MYSERIALX.println("ETH Stopped");
+        eth_connected = false;
+        break;
+    default:
+        break;
+    }
+}
+
+#endif
+
+
 //
 void setup() {
 
 	Serial.begin(BAUD_SERIAL1);
-	delay(100); // Need time here?
-
+	delay(DEF_SERIAL_DELAY); // Need time here?
 
 #if(0)
 	int incomingByte = 0; // For dumping unwanted initial ESP serial boot message.
@@ -271,14 +320,17 @@ void setup() {
 	MYSERIAL0_BEGIN;
 	delay(DEF_SERIAL_DELAY); // Need time here?
 #endif
+
 #ifdef MYSERIAL1_BEGIN
 	MYSERIAL1_BEGIN;
 	delay(DEF_SERIAL_DELAY); // Need time here?
 #endif
+
 #ifdef MYSERIAL2_BEGIN
 	MYSERIAL2_BEGIN;
 	delay(DEF_SERIAL_DELAY); // Need time here?
 #endif
+
 #ifdef MYSERIAL3_BEGIN
 	MYSERIAL3_BEGIN;
 	delay(DEF_SERIAL_DELAY); // Need time here?
@@ -348,16 +400,29 @@ void setup() {
 #endif
 
 #ifdef ARDUINO_ARCH_AVR
+	//digitalWrite(IO_PIN_53, OUTPUT); // Mega Slave Select (SS)
 
-	// for mega2560 hardware. ease of use via consecutive pin assignments on the connector(s).
 	digitalWrite(PIN_DUMMY_GROUND_D20, LOW); // For wiring convenience on Mega for Serial1 cable with adjacent ground
 	pinMode(PIN_DUMMY_GROUND_D20, OUTPUT);
 	digitalWrite(PIN_DUMMY_GROUND_D20, LOW); // Belt and braces.
 
-#if (1)
-	digitalWrite(IO_PIN_53, OUTPUT); // Mega Slave Select (SS)
+	digitalWrite(PIN_DUMMY_GROUND_D21, LOW); // For wiring convenience on Mega for Serial2 cable with adjacent ground
+	pinMode(PIN_DUMMY_GROUND_D21, OUTPUT);
+	digitalWrite(PIN_DUMMY_GROUND_D21, LOW); // Belt and braces.
 
-	// first encoder - encoder0 - slot 0 - for menu navigation
+		// first encoder - enc1 - encoder0 - slot 0 - for menu navigation
+	digitalWrite(PIN_DUMMY_GROUND_A11, LOW); // For wiring convenience on Mega for rotary enc power 0V on 5-pin header
+	pinMode(PIN_DUMMY_GROUND_A11, OUTPUT);
+	digitalWrite(PIN_DUMMY_GROUND_A11, LOW); // Belt and braces.
+
+	digitalWrite(PIN_DUMMY_5V0_A12, HIGH); // For wiring convenience on Mega for rotary enc power 5V on 5-pin header
+	pinMode(PIN_DUMMY_5V0_A12, OUTPUT);
+	digitalWrite(PIN_DUMMY_5V0_A12, HIGH); // Belt and braces.
+	
+#if (0)
+	// for mega2560 hardware. ease of use via consecutive pin assignments on the connector(s).
+
+	// first encoder - enc1 - encoder0 - slot 0 - for menu navigation
 	digitalWrite(PIN_DUMMY_5V0_A12, HIGH); // For wiring convenience on Mega for rotary encoder VCC 5V0 on 5-pin header
 	pinMode(PIN_DUMMY_5V0_A12, OUTPUT);
 	digitalWrite(PIN_DUMMY_5V0_A12, HIGH); // Belt and braces.
@@ -366,7 +431,7 @@ void setup() {
 	pinMode(PIN_DUMMY_GROUND_A11, OUTPUT);
 	digitalWrite(PIN_DUMMY_GROUND_A11, LOW); // Belt and braces.
 
-	// second encoder - encoder1
+	// second encoder - enc2 - encoder1
 	digitalWrite(PIN_DUMMY_5V0_D44, HIGH); // For wiring convenience on Mega for rotary encoder VCC 5V0 on 5-pin header
 	pinMode(PIN_DUMMY_5V0_D44, OUTPUT);
 	digitalWrite(PIN_DUMMY_5V0_D44, HIGH); // Belt and braces.
@@ -375,7 +440,7 @@ void setup() {
 	pinMode(PIN_DUMMY_GROUND_D46, OUTPUT);
 	digitalWrite(PIN_DUMMY_GROUND_D46, LOW); // Belt and braces.
 
-	// third encoder - encoder2
+	// third encoder - enc3 - encoder2
 	digitalWrite(PIN_DUMMY_5V0_D28, HIGH); // For wiring convenience on Mega for rotary encoder VCC 5V0 on 5-pin header
 	pinMode(PIN_DUMMY_5V0_D28, OUTPUT);
 	digitalWrite(PIN_DUMMY_5V0_D28, HIGH); // Belt and braces.
@@ -383,24 +448,25 @@ void setup() {
 	digitalWrite(PIN_DUMMY_GROUND_D30, LOW); // For wiring convenience on Mega for rotary encoder ground on 5-pin header
 	pinMode(PIN_DUMMY_GROUND_D30, OUTPUT);
 	digitalWrite(PIN_DUMMY_GROUND_D30, LOW); // Belt and braces.
-
 #endif
 
+#ifdef UI_ROTARY_ENC
 	// enc1 is index 0. enc2 is index 1, etc.
-	rotaryEncoder1 = new HardwareRotaryEncoder(40, 38, [](int encoderValue) {
+	rotaryEncoder1 = new HardwareRotaryEncoder(PIN_ENCODER2_DAT_D40, PIN_ENCODER2_CLK_D38, [](int encoderValue) {
 		menuTcmBaseCCW.setCurrentValue(encoderValue);
 	});
 
 	rotaryEncoder1->changePrecision(menuTcmBaseCCW.getMaximumValue(), menuTcmBaseCCW.getCurrentValue()); // max, curr
 	switches.setEncoder(1, rotaryEncoder1);
 
-	rotaryEncoder2 = new HardwareRotaryEncoder(24, 22, [](int encoderValue) {
+	rotaryEncoder2 = new HardwareRotaryEncoder(PIN_ENCODER3_DAT_D24, PIN_ENCODER3_CLK_D22, [](int encoderValue) {
 		menuTcmBaseTCW.setCurrentValue(encoderValue);
 	});
 
 	rotaryEncoder2->changePrecision(menuTcmBaseTCW.getMaximumValue(),
 																	menuTcmBaseTCW.getCurrentValue()); // max value, current value
 	switches.setEncoder(2, rotaryEncoder2);
+#endif
 
 	myCount1 = 1;
 	menuTcmCount1.setCurrentValue(myCount1);
@@ -412,14 +478,19 @@ void setup() {
 
 #endif // ARDUINO_ARCH_AVR
 
+#if(0)
 #define DEF_TCM_SERIAL_XOVER_SYNC_ONCE
 // #define DEF_TCM_SERIAL_XOVER_SYNC_REP
 
 #ifdef DEF_TCM_SERIAL_XOVER_SYNC_ONCE
 	refreshMenu();
 #endif
+#endif
+
 
 	taskManager.scheduleFixedRate(1000, [] { // ms. Simple way to keep XoverEmbedControl synced after schedule delay.
+
+
 #ifdef DEF_TCM_SERIAL_XOVER_SYNC_REP			 // For simple sync, these need to to be scheduled repeatedly.
 		menuTcmCount1.setSendRemoteNeededAll();
 		menuTcmCount2.setSendRemoteNeededAll();
@@ -429,6 +500,70 @@ void setup() {
 #endif
 		menuTcmTimeSec.setCurrentValue(menuTcmTimeSec.getCurrentValue() + 1); // Long way to avoid another variable.
 	});
+
+#if defined(INIDEF_ETHERMEGA2560)
+  // You can use Ethernet.init(pin) to configure the CS pin
+
+  Ethernet.init(PIN_ETHERNET_CS);  // Most Arduino shields
+
+  //Ethernet.init(5);   // MKR ETH shield
+
+  //Ethernet.init(0);   // Teensy 2.0
+
+  //Ethernet.init(20);  // Teensy++ 2.0
+
+  //Ethernet.init(15);  // ESP8266 with Adafruit Featherwing Ethernet
+
+  //Ethernet.init(33);  // ESP32 with Adafruit Featherwing Ethernet
+
+  // initialize the ethernet device
+
+  //Ethernet.begin(myMAC, myETHWiredStaticIP, myDNS, myGateway, mySubnet);
+  Ethernet.begin(myMAC, myETHWiredStaticIP);
+
+
+  // Check for Ethernet hardware present
+
+  if (Ethernet.hardwareStatus() == EthernetNoHardware) {
+
+    MYSERIALX.println("Ethernet shield was not found.  Sorry, can't run without hardware. :(");
+
+    while (true) {
+      delay(1); // do nothing, no point running without Ethernet hardware
+    }
+
+  }
+
+  if (Ethernet.linkStatus() == LinkOFF) {
+    MYSERIALX.println("Ethernet cable is not connected.");
+  }
+  // start listening for clients
+
+  MYSERIALX.println(Ethernet.localIP());
+#endif
+
+#ifdef INIDEF_LILYGO_T_INTERNET_COM
+  WiFi.onEvent(WiFiEvent);
+
+  ETH.begin(ETH_ADDR, ETH_POWER_PIN, ETH_MDC_PIN,
+            ETH_MDIO_PIN, ETH_TYPE, ETH_CLK_MODE);
+
+  if (ETH.config(myETHWiredStaticIP, myGateway, mySubnet, myDNS, myDNS) == false) {
+    MYSERIALX.println("Configuration FAILED.");
+  }
+	else {
+	  MYSERIALX.println("Configuration passed.");
+	}
+#endif
+  
+  //myServer.begin();
+
+  //MYSERIALX.print("Chat myServer address:");
+
+#ifdef INIDEF_MEGA2560
+  MYSERIALX.println(Ethernet.localIP());
+#endif
+
 
 #ifdef INIDEF_ARDUINOOTA
 	// Port defaults to 3232
@@ -514,8 +649,16 @@ void CALLBACK_FUNCTION onChangeTcmTimeSec(int id) {
 void CALLBACK_FUNCTION onChangeTcmRefreshMenu(int id) { refreshMenu(); }
 
 
+void (* resetFunc) (void) = 0; // Arduino Forum alto777
+
 void CALLBACK_FUNCTION onChangeTcmRestart(int id) {
+
+#ifndef INIDEF_ETHERMEGA2560
 	ESP.restart();
+#else
+	resetFunc(); // for ethermega2560
+#endif
+
 }
 
 
@@ -553,3 +696,28 @@ void CALLBACK_FUNCTION onChangeTcmNeoPixelLedWhite(int id) {
 // END_OF_FILE
 //
 
+
+
+void CALLBACK_FUNCTION onChangeTcmNPixLedWhite(int id) {
+    // TODO - your menu change code
+}
+
+
+void CALLBACK_FUNCTION onChangeTcmNPixLedRed(int id) {
+    // TODO - your menu change code
+}
+
+
+void CALLBACK_FUNCTION onChangeTcmNPixLedOff(int id) {
+    // TODO - your menu change code
+}
+
+
+void CALLBACK_FUNCTION onChangeTcmNPixLedGreen(int id) {
+    // TODO - your menu change code
+}
+
+
+void CALLBACK_FUNCTION onChangeTcmNPixLedBlue(int id) {
+    // TODO - your menu change code
+}

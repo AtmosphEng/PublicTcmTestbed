@@ -1,6 +1,6 @@
 {
   "version": "1.00",
-  "projectName": "embedControl : Serial",
+  "projectName": "PublicTcmSimple-ethermega - lcd ILI9341 - enc1\nembedCONTROL wired ethernet 192.168.20.111\n//embedCONTROL: Serial1",
   "author": "david",
   "items": [
     {
@@ -14,91 +14,6 @@
         "id": 5,
         "eepromAddress": -1,
         "functionName": "onChangeTcmDebugLED",
-        "readOnly": false,
-        "localOnly": false,
-        "visible": true,
-        "staticDataInRAM": false
-      }
-    },
-    {
-      "parentId": 0,
-      "type": "boolItem",
-      "defaultValue": "false",
-      "item": {
-        "naming": "TRUE_FALSE",
-        "name": "NeoPixelLedOff",
-        "variableName": "TcmNeoPixelLedOff",
-        "id": 7,
-        "eepromAddress": -1,
-        "functionName": "onChangeTcmNeoPixelLedOff",
-        "readOnly": false,
-        "localOnly": false,
-        "visible": true,
-        "staticDataInRAM": false
-      }
-    },
-    {
-      "parentId": 0,
-      "type": "boolItem",
-      "defaultValue": "false",
-      "item": {
-        "naming": "TRUE_FALSE",
-        "name": "NeoPixelLedRed",
-        "variableName": "NeoPixelLedRed",
-        "id": 8,
-        "eepromAddress": -1,
-        "functionName": "onChangeTcmNeoPixelLedRed",
-        "readOnly": false,
-        "localOnly": false,
-        "visible": true,
-        "staticDataInRAM": false
-      }
-    },
-    {
-      "parentId": 0,
-      "type": "boolItem",
-      "defaultValue": "false",
-      "item": {
-        "naming": "TRUE_FALSE",
-        "name": "NeoPixelLedGreen",
-        "variableName": "NeoPixelLedGreen",
-        "id": 9,
-        "eepromAddress": -1,
-        "functionName": "onChangeTcmNeoPixelLedGreen",
-        "readOnly": false,
-        "localOnly": false,
-        "visible": true,
-        "staticDataInRAM": false
-      }
-    },
-    {
-      "parentId": 0,
-      "type": "boolItem",
-      "defaultValue": "false",
-      "item": {
-        "naming": "TRUE_FALSE",
-        "name": "NeoPixelLedBlue",
-        "variableName": "NeoPixelLedBlue",
-        "id": 10,
-        "eepromAddress": -1,
-        "functionName": "onChangeTcmNeoPixelLedBlue",
-        "readOnly": false,
-        "localOnly": false,
-        "visible": true,
-        "staticDataInRAM": false
-      }
-    },
-    {
-      "parentId": 0,
-      "type": "boolItem",
-      "defaultValue": "false",
-      "item": {
-        "naming": "TRUE_FALSE",
-        "name": "NeoPixelLedWhite",
-        "variableName": "NeoPixelLedWhite",
-        "id": 11,
-        "eepromAddress": -1,
-        "functionName": "onChangeTcmNeoPixelLedWhite",
         "readOnly": false,
         "localOnly": false,
         "visible": true,
@@ -216,9 +131,26 @@
       "defaultValue": "false",
       "item": {
         "naming": "TRUE_FALSE",
+        "name": "RefreshMenu",
+        "variableName": "TcmRefreshMenu",
+        "id": 7,
+        "eepromAddress": -1,
+        "functionName": "onChangeTcmRefreshMenu",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 0,
+      "type": "boolItem",
+      "defaultValue": "false",
+      "item": {
+        "naming": "TRUE_FALSE",
         "name": "Restart",
         "variableName": "TcmRestart",
-        "id": 12,
+        "id": 8,
         "eepromAddress": -1,
         "functionName": "onChangeTcmRestart",
         "readOnly": false,
@@ -229,50 +161,155 @@
     }
   ],
   "codeOptions": {
-    "embeddedPlatform": "ARDUINO_ESP32",
-    "lastDisplayUuid": "cdd0be35-f6ff-40ae-86fc-f9d04a6e8679",
-    "lastInputUuid": "89cd7f70-0457-4884-97c2-0db904ccb0ba",
+    "embeddedPlatform": "ARDUINO",
+    "lastDisplayUuid": "4dcb12ec-13d8-4466-b8b6-bd575eae4612",
+    "lastInputUuid": "6dd87e7d-e751-4912-a70d-91793b1d3d87",
     "lastRemoteUuids": [
-      "ba23b2a7-040e-40e2-8fae-d45c82cf450b",
-      "46c30011-cac6-4598-a7b8-b0630d55daab"
+      "0877131c-e03e-426b-8eaf-228e01f5e7f1",
+      "1e38dc42-672d-4c1c-a393-2c7632bf6c5c"
     ],
     "lastThemeUuid": "e4524028-edd8-4e0a-ae15-a1f2ba05354f",
     "applicationUUID": "f1cdf4ed-8d8f-469e-b907-91c3e1536fab",
-    "applicationName": "PTcmSim 20241015 2119",
+    "applicationName": "PTcSim 241017 2152",
     "lastProperties": [
       {
-        "name": "SERIAL_PORT",
-        "latestValue": "Serial",
-        "subsystem": "REMOTE"
+        "name": "DISPLAY_VARIABLE",
+        "latestValue": "gfx",
+        "subsystem": "DISPLAY"
       },
       {
-        "name": "HARDWARE_PORT",
+        "name": "DISPLAY_TYPE",
+        "latestValue": "Adafruit_ILI9341",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_WIDTH",
+        "latestValue": "320",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_HEIGHT",
+        "latestValue": "240",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_RESET_PIN",
+        "latestValue": "-1",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_CS_PIN",
+        "latestValue": "8",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_RS_PIN",
+        "latestValue": "9",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_DATA_PIN",
+        "latestValue": "11",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_CLOCK_PIN",
+        "latestValue": "12",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "ST7735_TAB_TYPE",
+        "latestValue": "INITR_BLACKTAB",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_ROTATION",
+        "latestValue": "0",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "UPDATES_PER_SEC",
+        "latestValue": "5",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_BUFFER_SIZE",
+        "latestValue": "0",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "SW_POLLING_MODE",
+        "latestValue": "SWITCHES_POLL_EVERYTHING",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "SWITCH_IODEVICE",
+        "latestValue": "devicePins",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "ENCODER_PIN_A",
+        "latestValue": "A14",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "ENCODER_PIN_B",
+        "latestValue": "A15",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "ENCODER_PIN_OK",
+        "latestValue": "A13",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "ENCODER_BACK_PIN",
+        "latestValue": "-1",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "ENCODER_NEXT_PIN",
+        "latestValue": "-1",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "PULLUP_LOGIC",
         "latestValue": "true",
-        "subsystem": "REMOTE"
+        "subsystem": "INPUT"
       },
       {
-        "name": "ESPWIFI_CONCURRENT_CONNECTIONS",
+        "name": "ENCODER_IS_QUARTER_CYCLE",
+        "latestValue": "false",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "ETH_CONCURRENT_CONNECTIONS",
         "latestValue": "1",
         "subsystem": "REMOTE"
       },
       {
-        "name": "ESPWIFI_LISTEN_PORT1",
+        "name": "ETH_LIBRARY_TYPE",
+        "latestValue": "ETHERNET_2",
+        "subsystem": "REMOTE"
+      },
+      {
+        "name": "ETH_LISTEN_PORT1",
         "latestValue": "3333",
         "subsystem": "REMOTE"
       },
       {
-        "name": "ESPWIFI_LISTEN_PORT2",
+        "name": "ETH_LISTEN_PORT2",
         "latestValue": "3334",
         "subsystem": "REMOTE"
       },
       {
-        "name": "ESPWIFI_LISTEN_PORT3",
+        "name": "ETH_LISTEN_PORT3",
         "latestValue": "3335",
         "subsystem": "REMOTE"
       },
       {
-        "name": "ESPWIFI_BUFFERED",
-        "latestValue": "true",
+        "name": "SERIAL_PORT",
+        "latestValue": "Serial1",
         "subsystem": "REMOTE"
       },
       {

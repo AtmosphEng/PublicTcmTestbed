@@ -1,0 +1,410 @@
+{
+  "version": "1.00",
+  "projectName": "lilygo t-internet-com\nembedCONTROL: esp32 wifi .11 \u0026 wired .111 ok. Only code gen f. wifi used.\nlcd ILI9341 - 1-button input (but no decrement function available)",
+  "author": "david",
+  "items": [
+    {
+      "parentId": 0,
+      "type": "boolItem",
+      "defaultValue": "false",
+      "item": {
+        "naming": "TRUE_FALSE",
+        "name": "DebugLED",
+        "variableName": "TcmDebugLED",
+        "id": 5,
+        "eepromAddress": -1,
+        "functionName": "onChangeTcmDebugLED",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 0,
+      "type": "boolItem",
+      "defaultValue": "false",
+      "item": {
+        "naming": "TRUE_FALSE",
+        "name": "NPixLedOff",
+        "variableName": "TcmNPixLedOff",
+        "id": 7,
+        "eepromAddress": -1,
+        "functionName": "onChangeTcmNPixLedOff",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 0,
+      "type": "boolItem",
+      "defaultValue": "false",
+      "item": {
+        "naming": "TRUE_FALSE",
+        "name": "NPixLedRed",
+        "variableName": "TcmNPixLedRed",
+        "id": 8,
+        "eepromAddress": -1,
+        "functionName": "onChangeTcmNPixLedRed",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 0,
+      "type": "boolItem",
+      "defaultValue": "false",
+      "item": {
+        "naming": "TRUE_FALSE",
+        "name": "NPixLedGreen",
+        "variableName": "TcmNPixLedGreen",
+        "id": 9,
+        "eepromAddress": -1,
+        "functionName": "onChangeTcmNPixLedGreen",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 0,
+      "type": "boolItem",
+      "defaultValue": "false",
+      "item": {
+        "naming": "TRUE_FALSE",
+        "name": "NPixLedBlue",
+        "variableName": "TcmNPixLedBlue",
+        "id": 10,
+        "eepromAddress": -1,
+        "functionName": "onChangeTcmNPixLedBlue",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 0,
+      "type": "boolItem",
+      "defaultValue": "false",
+      "item": {
+        "naming": "TRUE_FALSE",
+        "name": "NPixLedWhite",
+        "variableName": "TcmNPixLedWhite",
+        "id": 11,
+        "eepromAddress": -1,
+        "functionName": "onChangeTcmNPixLedWhite",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 0,
+      "type": "analogItem",
+      "defaultValue": "0",
+      "item": {
+        "maxValue": 255,
+        "offset": 0,
+        "divisor": 1,
+        "unitName": "",
+        "step": 1,
+        "name": "Count1",
+        "variableName": "TcmCount1",
+        "id": 1,
+        "eepromAddress": -1,
+        "functionName": "onChangeTcmCount1",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 0,
+      "type": "analogItem",
+      "defaultValue": "0",
+      "item": {
+        "maxValue": 255,
+        "offset": 0,
+        "divisor": 1,
+        "unitName": "",
+        "step": 1,
+        "name": "Count2",
+        "variableName": "TcmCount2",
+        "id": 2,
+        "eepromAddress": -1,
+        "functionName": "onChangeTcmCount2",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 0,
+      "type": "analogItem",
+      "defaultValue": "0",
+      "item": {
+        "maxValue": 255,
+        "offset": 0,
+        "divisor": 1,
+        "unitName": "",
+        "step": 1,
+        "name": "BaseTCW",
+        "variableName": "TcmBaseTCW",
+        "id": 3,
+        "eepromAddress": -1,
+        "functionName": "onChangeTcmBaseTCW",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 0,
+      "type": "analogItem",
+      "defaultValue": "0",
+      "item": {
+        "maxValue": 255,
+        "offset": 0,
+        "divisor": 1,
+        "unitName": "",
+        "step": 1,
+        "name": "BaseCCW",
+        "variableName": "TcmBaseCCW",
+        "id": 4,
+        "eepromAddress": -1,
+        "functionName": "onChangeTcmBaseCCW",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 0,
+      "type": "analogItem",
+      "defaultValue": "0",
+      "item": {
+        "maxValue": 32000,
+        "offset": 0,
+        "divisor": 1,
+        "unitName": "",
+        "step": 1,
+        "name": "TimeSec",
+        "variableName": "TcmTimeSec",
+        "id": 6,
+        "eepromAddress": -1,
+        "functionName": "onChangeTcmTimeSec",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 0,
+      "type": "boolItem",
+      "defaultValue": "false",
+      "item": {
+        "naming": "TRUE_FALSE",
+        "name": "Restart",
+        "variableName": "TcmRestart",
+        "id": 12,
+        "eepromAddress": -1,
+        "functionName": "onChangeTcmRestart",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    }
+  ],
+  "codeOptions": {
+    "embeddedPlatform": "ARDUINO_ESP32",
+    "lastDisplayUuid": "4dcb12ec-13d8-4466-b8b6-bd575eae4612",
+    "lastInputUuid": "4F92CBC0-D13A-4090-9B86-C1952FE42D9B",
+    "lastRemoteUuids": [
+      "46c30011-cac6-4598-a7b8-b0630d55daab"
+    ],
+    "lastThemeUuid": "e4524028-edd8-4e0a-ae15-a1f2ba05354f",
+    "applicationUUID": "f1cdf4ed-8d8f-469e-b907-91c3e1536fab",
+    "applicationName": "PTcSim 241018 1736",
+    "lastProperties": [
+      {
+        "name": "DISPLAY_VARIABLE",
+        "latestValue": "gfx",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_TYPE",
+        "latestValue": "Adafruit_ILI9341",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_WIDTH",
+        "latestValue": "320",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_HEIGHT",
+        "latestValue": "240",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_RESET_PIN",
+        "latestValue": "-1",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_CS_PIN",
+        "latestValue": "2",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_RS_PIN",
+        "latestValue": "14",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_DATA_PIN",
+        "latestValue": "13",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_CLOCK_PIN",
+        "latestValue": "15",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "ST7735_TAB_TYPE",
+        "latestValue": "INITR_BLACKTAB",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_ROTATION",
+        "latestValue": "2",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "UPDATES_PER_SEC",
+        "latestValue": "5",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_BUFFER_SIZE",
+        "latestValue": "0",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "SW_POLLING_MODE",
+        "latestValue": "SWITCHES_POLL_EVERYTHING",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "SWITCH_IODEVICE",
+        "latestValue": "devicePins",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "BUTTON_PIN",
+        "latestValue": "33",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "PULLUP_LOGIC",
+        "latestValue": "true",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "DOUBLE_CLICK_THRESHOLD",
+        "latestValue": "1000",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "ESPWIFI_CONCURRENT_CONNECTIONS",
+        "latestValue": "1",
+        "subsystem": "REMOTE"
+      },
+      {
+        "name": "ESPWIFI_LISTEN_PORT1",
+        "latestValue": "3333",
+        "subsystem": "REMOTE"
+      },
+      {
+        "name": "ESPWIFI_LISTEN_PORT2",
+        "latestValue": "3334",
+        "subsystem": "REMOTE"
+      },
+      {
+        "name": "ESPWIFI_LISTEN_PORT3",
+        "latestValue": "3335",
+        "subsystem": "REMOTE"
+      },
+      {
+        "name": "ESPWIFI_BUFFERED",
+        "latestValue": "true",
+        "subsystem": "REMOTE"
+      },
+      {
+        "name": "ITEM_FONT",
+        "latestValue": "def:,2",
+        "subsystem": "THEME"
+      },
+      {
+        "name": "TITLE_FONT",
+        "latestValue": "def:,2",
+        "subsystem": "THEME"
+      },
+      {
+        "name": "BORDER_FOR_ACTIONS",
+        "latestValue": "0",
+        "subsystem": "THEME"
+      },
+      {
+        "name": "TITLE_SHOW_MODE",
+        "latestValue": "TITLE_FIRST_ROW",
+        "subsystem": "THEME"
+      },
+      {
+        "name": "USE_TC_UNICODE",
+        "latestValue": "false",
+        "subsystem": "THEME"
+      },
+      {
+        "name": "USE_SLIDER_ANALOG",
+        "latestValue": "true",
+        "subsystem": "THEME"
+      },
+      {
+        "name": "NEED_EDITING_ICONS",
+        "latestValue": "true",
+        "subsystem": "THEME"
+      }
+    ],
+    "namingRecursive": true,
+    "useCppMain": true,
+    "saveLocation": "PROJECT_TO_CURRENT_WITH_GENERATED",
+    "usingSizedEEPROMStorage": false,
+    "eepromDefinition": "",
+    "authenticatorDefinition": "",
+    "projectIoExpanders": [
+      "deviceIO:"
+    ],
+    "menuInMenuCollection": {
+      "menuDefinitions": []
+    },
+    "packageNamespace": "",
+    "appIsModular": false,
+    "listOfEmbeddedForms": []
+  },
+  "stringLists": []
+}
