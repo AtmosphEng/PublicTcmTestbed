@@ -237,7 +237,7 @@
     ],
     "lastThemeUuid": "e4524028-edd8-4e0a-ae15-a1f2ba05354f",
     "applicationUUID": "f1cdf4ed-8d8f-469e-b907-91c3e1536fab",
-    "applicationName": "PTcSim 241018 1736",
+    "applicationName": "PTcSim 241018 1800",
     "lastProperties": [
       {
         "name": "DISPLAY_VARIABLE",
@@ -326,7 +326,7 @@
       },
       {
         "name": "DOUBLE_CLICK_THRESHOLD",
-        "latestValue": "1000",
+        "latestValue": "800",
         "subsystem": "INPUT"
       },
       {

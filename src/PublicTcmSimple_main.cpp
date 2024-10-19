@@ -72,11 +72,25 @@
 
 #include "src_menu.h" // for tcMenu
 
+#ifdef INIDEF_ETHERMEGA2560
 #include "Ethernet.h"
+#endif
 
+#ifdef INIDEF_LILYGO_T_INTERNET_COM
 #include <ETH.h>
+#endif
 
+#ifndef INIDEF_MEGA2560
 #include "..\..\Credentials\Credentials.h"
+#endif
+
+#ifdef INIDEF_MEGA2560
+#include "pin_config-avr-mega2560.h" // SPI data LCD interface
+#endif
+
+#ifdef INIDEF_ETHERMEGA2560
+#include "pin_config-avr-ethermega2560.h" // SPI data LCD interface
+#endif
 
 #ifdef INIDEF_KEYESTUDIO_KS0413
 #include "pin_config-keyestudio-ESP32.h" // SPI data LCD interface
@@ -560,7 +574,7 @@ void setup() {
 
   //MYSERIALX.print("Chat myServer address:");
 
-#ifdef INIDEF_MEGA2560
+#ifdef INIDEF_ETHERMEGA2560
   MYSERIALX.println(Ethernet.localIP());
 #endif
 
@@ -653,11 +667,11 @@ void (* resetFunc) (void) = 0; // Arduino Forum alto777
 
 void CALLBACK_FUNCTION onChangeTcmRestart(int id) {
 
-#ifndef INIDEF_ETHERMEGA2560
-	ESP.restart();
-#else
-	resetFunc(); // for ethermega2560
-#endif
+//#ifndef INIDEF_ETHERMEGA2560
+//	ESP.restart();
+//#else
+	resetFunc();
+//#endif
 
 }
 

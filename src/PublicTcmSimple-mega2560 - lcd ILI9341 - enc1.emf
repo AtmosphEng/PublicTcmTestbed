@@ -1,6 +1,6 @@
 {
   "version": "1.00",
-  "projectName": "PTcmSimple_t7-s3\nembedCONTROL: WiFi STA mode on 192.168.66.11:3333\nembedCONTROL: Serial1\nARDUINOOTA",
+  "projectName": "PublicTcmSimple-mega2560 - lcd ILI9341 - enc1\n",
   "author": "david",
   "items": [
     {
@@ -23,7 +23,7 @@
     {
       "parentId": 0,
       "type": "analogItem",
-      "defaultValue": "99",
+      "defaultValue": "0",
       "item": {
         "maxValue": 255,
         "offset": 0,
@@ -44,7 +44,7 @@
     {
       "parentId": 0,
       "type": "analogItem",
-      "defaultValue": "128",
+      "defaultValue": "0",
       "item": {
         "maxValue": 255,
         "offset": 0,
@@ -161,16 +161,15 @@
     }
   ],
   "codeOptions": {
-    "embeddedPlatform": "ARDUINO_ESP32",
+    "embeddedPlatform": "ARDUINO",
     "lastDisplayUuid": "4dcb12ec-13d8-4466-b8b6-bd575eae4612",
     "lastInputUuid": "6dd87e7d-e751-4912-a70d-91793b1d3d87",
     "lastRemoteUuids": [
-      "46c30011-cac6-4598-a7b8-b0630d55daab",
-      "ba23b2a7-040e-40e2-8fae-d45c82cf450b"
+      "1e38dc42-672d-4c1c-a393-2c7632bf6c5c"
     ],
-    "lastThemeUuid": "e4524028-edd8-4e0a-ae15-a1f2ba05354f",
+    "lastThemeUuid": "2F1EAB1E-0469-42C8-A222-BE2DF96D6D81",
     "applicationUUID": "f1cdf4ed-8d8f-469e-b907-91c3e1536fab",
-    "applicationName": "PTcSim 241019 1815",
+    "applicationName": "PTcSim 241018 2042",
     "lastProperties": [
       {
         "name": "DISPLAY_VARIABLE",
@@ -199,7 +198,7 @@
       },
       {
         "name": "DISPLAY_CS_PIN",
-        "latestValue": "11",
+        "latestValue": "10",
         "subsystem": "DISPLAY"
       },
       {
@@ -209,12 +208,12 @@
       },
       {
         "name": "DISPLAY_DATA_PIN",
-        "latestValue": "21",
+        "latestValue": "51",
         "subsystem": "DISPLAY"
       },
       {
         "name": "DISPLAY_CLOCK_PIN",
-        "latestValue": "42",
+        "latestValue": "52",
         "subsystem": "DISPLAY"
       },
       {
@@ -249,17 +248,17 @@
       },
       {
         "name": "ENCODER_PIN_A",
-        "latestValue": "16",
+        "latestValue": "A14",
         "subsystem": "INPUT"
       },
       {
         "name": "ENCODER_PIN_B",
-        "latestValue": "18",
+        "latestValue": "A15",
         "subsystem": "INPUT"
       },
       {
         "name": "ENCODER_PIN_OK",
-        "latestValue": "15",
+        "latestValue": "A13",
         "subsystem": "INPUT"
       },
       {
@@ -283,38 +282,8 @@
         "subsystem": "INPUT"
       },
       {
-        "name": "ESPWIFI_CONCURRENT_CONNECTIONS",
-        "latestValue": "1",
-        "subsystem": "REMOTE"
-      },
-      {
-        "name": "ESPWIFI_LISTEN_PORT1",
-        "latestValue": "3333",
-        "subsystem": "REMOTE"
-      },
-      {
-        "name": "ESPWIFI_LISTEN_PORT2",
-        "latestValue": "3334",
-        "subsystem": "REMOTE"
-      },
-      {
-        "name": "ESPWIFI_LISTEN_PORT3",
-        "latestValue": "3335",
-        "subsystem": "REMOTE"
-      },
-      {
-        "name": "ESPWIFI_BUFFERED",
-        "latestValue": "true",
-        "subsystem": "REMOTE"
-      },
-      {
         "name": "SERIAL_PORT",
-        "latestValue": "Serial1",
-        "subsystem": "REMOTE"
-      },
-      {
-        "name": "HARDWARE_PORT",
-        "latestValue": "true",
+        "latestValue": "Serial",
         "subsystem": "REMOTE"
       },
       {
@@ -328,11 +297,6 @@
         "subsystem": "THEME"
       },
       {
-        "name": "BORDER_FOR_ACTIONS",
-        "latestValue": "0",
-        "subsystem": "THEME"
-      },
-      {
         "name": "TITLE_SHOW_MODE",
         "latestValue": "TITLE_FIRST_ROW",
         "subsystem": "THEME"
@@ -340,11 +304,6 @@
       {
         "name": "USE_TC_UNICODE",
         "latestValue": "false",
-        "subsystem": "THEME"
-      },
-      {
-        "name": "USE_SLIDER_ANALOG",
-        "latestValue": "true",
         "subsystem": "THEME"
       },
       {
