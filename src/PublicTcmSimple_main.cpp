@@ -92,8 +92,12 @@
 #include "pin_config-avr-ethermega2560.h" // SPI data LCD interface
 #endif
 
+#if(0)
 #ifdef INIDEF_KEYESTUDIO_KS0413
 #include "pin_config-keyestudio-ESP32.h" // SPI data LCD interface
+#endif
+#else
+#define PIN_DEBUG_LED 19
 #endif
 
 #ifdef INIDEF_LILYGO_T_INTERNET_COM

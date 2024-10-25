@@ -1,8 +1,25 @@
 {
   "version": "1.00",
-  "projectName": "TcmSimpleTest_ESP32_ILI9341",
+  "projectName": "PublicTcmSimple_ESP32_ILI9341-v2",
   "author": "david",
   "items": [
+    {
+      "parentId": 0,
+      "type": "boolItem",
+      "defaultValue": "false",
+      "item": {
+        "naming": "TRUE_FALSE",
+        "name": "DebugLED",
+        "variableName": "TcmDebugLED",
+        "id": 5,
+        "eepromAddress": -1,
+        "functionName": "onChangeTcmDebugLED",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
     {
       "parentId": 0,
       "type": "analogItem",
@@ -114,11 +131,11 @@
       "defaultValue": "false",
       "item": {
         "naming": "TRUE_FALSE",
-        "name": "DebugLED",
-        "variableName": "TcmDebugLED",
-        "id": 5,
+        "name": "Restart",
+        "variableName": "TcmRestart",
+        "id": 7,
         "eepromAddress": -1,
-        "functionName": "onChangeTcmDebugLED",
+        "functionName": "onChangeTcmRestart",
         "readOnly": false,
         "localOnly": false,
         "visible": true,
@@ -131,11 +148,11 @@
     "lastDisplayUuid": "4dcb12ec-13d8-4466-b8b6-bd575eae4612",
     "lastInputUuid": "6dd87e7d-e751-4912-a70d-91793b1d3d87",
     "lastRemoteUuids": [
-      "ba23b2a7-040e-40e2-8fae-d45c82cf450b"
+      "46c30011-cac6-4598-a7b8-b0630d55daab"
     ],
     "lastThemeUuid": "e4524028-edd8-4e0a-ae15-a1f2ba05354f",
     "applicationUUID": "f1cdf4ed-8d8f-469e-b907-91c3e1536fab",
-    "applicationName": "TcmSim 230819 2200",
+    "applicationName": "PTcSim 241025 2220",
     "lastProperties": [
       {
         "name": "DISPLAY_VARIABLE",
@@ -164,22 +181,22 @@
       },
       {
         "name": "DISPLAY_CS_PIN",
-        "latestValue": "27",
+        "latestValue": "22",
         "subsystem": "DISPLAY"
       },
       {
         "name": "DISPLAY_RS_PIN",
-        "latestValue": "14",
+        "latestValue": "21",
         "subsystem": "DISPLAY"
       },
       {
         "name": "DISPLAY_DATA_PIN",
-        "latestValue": "-1",
+        "latestValue": "23",
         "subsystem": "DISPLAY"
       },
       {
         "name": "DISPLAY_CLOCK_PIN",
-        "latestValue": "-1",
+        "latestValue": "18",
         "subsystem": "DISPLAY"
       },
       {
@@ -189,7 +206,7 @@
       },
       {
         "name": "DISPLAY_ROTATION",
-        "latestValue": "2",
+        "latestValue": "0",
         "subsystem": "DISPLAY"
       },
       {
@@ -214,17 +231,17 @@
       },
       {
         "name": "ENCODER_PIN_A",
-        "latestValue": "32",
+        "latestValue": "17",
         "subsystem": "INPUT"
       },
       {
         "name": "ENCODER_PIN_B",
-        "latestValue": "33",
+        "latestValue": "16",
         "subsystem": "INPUT"
       },
       {
         "name": "ENCODER_PIN_OK",
-        "latestValue": "35",
+        "latestValue": "5",
         "subsystem": "INPUT"
       },
       {
@@ -248,12 +265,27 @@
         "subsystem": "INPUT"
       },
       {
-        "name": "SERIAL_PORT",
-        "latestValue": "Serial2",
+        "name": "ESPWIFI_CONCURRENT_CONNECTIONS",
+        "latestValue": "1",
         "subsystem": "REMOTE"
       },
       {
-        "name": "HARDWARE_PORT",
+        "name": "ESPWIFI_LISTEN_PORT1",
+        "latestValue": "3333",
+        "subsystem": "REMOTE"
+      },
+      {
+        "name": "ESPWIFI_LISTEN_PORT2",
+        "latestValue": "3334",
+        "subsystem": "REMOTE"
+      },
+      {
+        "name": "ESPWIFI_LISTEN_PORT3",
+        "latestValue": "3335",
+        "subsystem": "REMOTE"
+      },
+      {
+        "name": "ESPWIFI_BUFFERED",
         "latestValue": "true",
         "subsystem": "REMOTE"
       },
@@ -295,7 +327,7 @@
     ],
     "namingRecursive": true,
     "useCppMain": true,
-    "saveLocation": "ALL_TO_CURRENT",
+    "saveLocation": "PROJECT_TO_CURRENT_WITH_GENERATED",
     "usingSizedEEPROMStorage": false,
     "eepromDefinition": "",
     "authenticatorDefinition": "",
@@ -306,7 +338,8 @@
       "menuDefinitions": []
     },
     "packageNamespace": "",
-    "appIsModular": false
+    "appIsModular": false,
+    "listOfEmbeddedForms": []
   },
   "stringLists": []
 }
