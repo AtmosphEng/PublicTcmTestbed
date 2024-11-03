@@ -31,6 +31,10 @@
 //		(apart from T7-S3 h/w reset causing Windows temp removal of the corrsponding COMx port).
 //
 //	TARGET(s): lilygo-t-display-s3
+//		Fix for blank TFT_eSPI display - check the following 2x custom PIO project files
+//   		1) PROJDIR/.pio/libdeps/lilygo-t-display-s3/TFT_eSPI # for custom: User_Setup_Select.h
+//   		2) PROJDIR/.pio/libdeps/lilygo-t-display-s3/TFT_eSPI/User_Setups for custom: Setup206_LilyGo_T_Display_S3.h
+//
 //		T-Display-S3 Compile Warning :
 //		Compiling .pio\build\lilygo-t-display-s3\src\PublicTcmSimple_menu.cpp.o
 //		In file included from .pio/libdeps/lilygo-t-display-s3/TFT_eSPI/TFT_eSPI.h:96,
@@ -92,12 +96,12 @@
 #include "pin_config-avr-ethermega2560.h" // SPI data LCD interface
 #endif
 
-#if(0)
+#if(0) // AAAFIXME
 #ifdef INIDEF_KEYESTUDIO_KS0413
 #include "pin_config-keyestudio-ESP32.h" // SPI data LCD interface
 #endif
 #else
-#define PIN_DEBUG_LED 19
+// #define PIN_DEBUG_LED 19
 #endif
 
 #ifdef INIDEF_LILYGO_T_INTERNET_COM
