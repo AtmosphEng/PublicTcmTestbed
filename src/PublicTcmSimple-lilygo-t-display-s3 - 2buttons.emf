@@ -1,6 +1,6 @@
 {
   "version": "1.00",
-  "projectName": "t-display-s3\ntcmSimpleTest - 2buttons\n//ecRC - Serial0 COM3 - menu.cpp needs cast of (HardwareSerial*) to compile\necRC - wifi 3333\n",
+  "projectName": "tcMenu ip: 2-buttons\nembedCONTROL : Serial2",
   "author": "david",
   "items": [
     {
@@ -148,12 +148,11 @@
     "lastDisplayUuid": "e6342680-6fab-4d1b-ac08-ce8dbfc0974c",
     "lastInputUuid": "560E5382-52C6-4641-BB2B-5C9A9DE06785",
     "lastRemoteUuids": [
-      "46c30011-cac6-4598-a7b8-b0630d55daab",
-      "2c101fec-1f7d-4ff3-8d2b-992ad41e7fcb"
+      "ba23b2a7-040e-40e2-8fae-d45c82cf450b"
     ],
-    "lastThemeUuid": "e4524028-edd8-4e0a-ae15-a1f2ba05354f",
+    "lastThemeUuid": "2F1EAB1E-0469-42C8-A222-BE2DF96D6D81",
     "applicationUUID": "f1cdf4ed-8d8f-469e-b907-91c3e1536fab",
-    "applicationName": "TcmSim 240405 1625",
+    "applicationName": "PTcSim 241106 1536",
     "lastProperties": [
       {
         "name": "DISPLAY_VARIABLE",
@@ -237,7 +236,7 @@
       },
       {
         "name": "SW_POLLING_MODE",
-        "latestValue": "SWITCHES_NO_POLLING",
+        "latestValue": "SWITCHES_POLL_EVERYTHING",
         "subsystem": "INPUT"
       },
       {
@@ -247,12 +246,12 @@
       },
       {
         "name": "ENCODER_UP_PIN",
-        "latestValue": "14",
+        "latestValue": "0",
         "subsystem": "INPUT"
       },
       {
         "name": "ENCODER_DOWN_PIN",
-        "latestValue": "0",
+        "latestValue": "14",
         "subsystem": "INPUT"
       },
       {
@@ -261,27 +260,12 @@
         "subsystem": "INPUT"
       },
       {
-        "name": "ESPWIFI_CONCURRENT_CONNECTIONS",
-        "latestValue": "1",
+        "name": "SERIAL_PORT",
+        "latestValue": "Serial2",
         "subsystem": "REMOTE"
       },
       {
-        "name": "ESPWIFI_LISTEN_PORT1",
-        "latestValue": "3333",
-        "subsystem": "REMOTE"
-      },
-      {
-        "name": "ESPWIFI_LISTEN_PORT2",
-        "latestValue": "3334",
-        "subsystem": "REMOTE"
-      },
-      {
-        "name": "ESPWIFI_LISTEN_PORT3",
-        "latestValue": "3335",
-        "subsystem": "REMOTE"
-      },
-      {
-        "name": "ESPWIFI_BUFFERED",
+        "name": "HARDWARE_PORT",
         "latestValue": "true",
         "subsystem": "REMOTE"
       },
@@ -296,11 +280,6 @@
         "subsystem": "THEME"
       },
       {
-        "name": "BORDER_FOR_ACTIONS",
-        "latestValue": "0",
-        "subsystem": "THEME"
-      },
-      {
         "name": "TITLE_SHOW_MODE",
         "latestValue": "TITLE_FIRST_ROW",
         "subsystem": "THEME"
@@ -308,11 +287,6 @@
       {
         "name": "USE_TC_UNICODE",
         "latestValue": "false",
-        "subsystem": "THEME"
-      },
-      {
-        "name": "USE_SLIDER_ANALOG",
-        "latestValue": "true",
         "subsystem": "THEME"
       },
       {
@@ -334,8 +308,7 @@
       "menuDefinitions": []
     },
     "packageNamespace": "",
-    "appIsModular": false,
-    "listOfEmbeddedForms": []
+    "appIsModular": false
   },
   "stringLists": []
 }

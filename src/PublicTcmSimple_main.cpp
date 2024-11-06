@@ -130,6 +130,22 @@ APA102<PIN_APA102_DI, PIN_APA102_CLK> ledStrip; // t-embed builtin RGB_LED
 #include "pin_config-t7-s3-esp32-s3.h"
 #endif
 
+#include "myConfig.h"
+#include <WiFi.h>
+
+#ifdef CONF_EXTRA_ENC2_TCW
+HardwareRotaryEncoder* TCWRotaryEncoder2;
+#define DEF_TCM_TCW_ENCODER2 menuTcmBaseTCW // ASSIGN ENCODER2 TO ANALOGMENUITEM.
+#define DEF_TCM_INDEX_ENCODER2 1 // Note - 1st encoder is tcmenu indexed as 0.
+#endif
+
+#ifdef CONF_EXTRA_ENC3_CCW
+HardwareRotaryEncoder* CCWRotaryEncoder3;
+#define DEF_TCM_CCW_ENCODER3 menuTcmBaseCCW // ASSIGN ENCODER3 TO ANALOGMENUITEM.
+#define DEF_TCM_INDEX_ENCODER3 2 // Note - 1st encoder is tcmenu indexed as 0.
+#endif
+
+
 #define MYSERIALX Serial1 // myDebug
 
 #ifdef INIDEF_ARDUINOOTA
@@ -370,6 +386,7 @@ void setup() {
 #define ALPHALIMA_DELAY_MS 2000
 
 #ifdef INIDEF_WIFI_STA
+	IPAddress ip_static (INIDEF_WIFI_IP2);
 	WiFi.mode(WIFI_STA);
 	WiFi.config(ip_static, ip_gway, netmask);
 	WiFi.begin(ssid, pw);
@@ -509,10 +526,39 @@ void setup() {
 #endif
 #endif
 
+#ifdef CONF_EXTRA_ENC2_TCW
+	pinMode(PIN_ENC2_A, INPUT_PULLUP); // for CCWRotaryEncoder2
+	pinMode(PIN_ENC2_B, INPUT_PULLUP);
+	//pinMode(PIN_ENC2_OK, INPUT_PULLUP); // Not required.
+
+	TCWRotaryEncoder2 = new HardwareRotaryEncoder // TCW
+	//	(PIN_IO44_ENC2_A_TCW_T7S3_B02_YELLOW, PIN_IO14_ENC2_B_TCW_ALSO_FSPI_WP_DUPLICATED_STEMMA_PIN3_T7S3_B03_GREEN, 
+	(PIN_ENC2_B, PIN_ENC2_A, 
+		[](int valueEncoder2) { 
+			// no current action on the pushbutton switch press, change the menu using encoder rotation only.
+	DEF_TCM_TCW_ENCODER2.setCurrentValue(valueEncoder2);
+	});
+	TCWRotaryEncoder2->changePrecision(DEF_TCM_TCW_ENCODER2.getMaximumValue(), DEF_TCM_TCW_ENCODER2.getCurrentValue() );
+	switches.setEncoder(DEF_TCM_INDEX_ENCODER2, TCWRotaryEncoder2); // Do not relocate this line.
+#endif
+
+#ifdef CONF_EXTRA_ENC3_CCW
+	pinMode(PIN_ENC3_A, INPUT_PULLUP); // for CCWRotaryEncoder2
+	pinMode(PIN_ENC3_B, INPUT_PULLUP);
+	//pinMode(PIN_ENC3_OK, INPUT_PULLUP); // Not required.
+
+	CCWRotaryEncoder3 = new HardwareRotaryEncoder
+	// (PIN_IO01_ENC3_A_TCW__STRAPPING_T7S3_A09_YELLOW, PIN_IO06_ENC3_B_TCW_T7S3_A10_GREEN, 
+	(PIN_ENC3_B, PIN_ENC3_A, 
+	[](int valueEncoder3) { 
+			// no current action on the pushbutton switch press, change the menu using encoder rotation only.
+		DEF_TCM_CCW_ENCODER3.setCurrentValue(valueEncoder3);
+	});
+	CCWRotaryEncoder3->changePrecision(DEF_TCM_CCW_ENCODER3.getMaximumValue(), DEF_TCM_CCW_ENCODER3.getCurrentValue() );
+	switches.setEncoder(DEF_TCM_INDEX_ENCODER3, CCWRotaryEncoder3); // Do not relocate this line.
+#endif
 
 	taskManager.scheduleFixedRate(1000, [] { // ms. Simple way to keep XoverEmbedControl synced after schedule delay.
-
-
 #ifdef DEF_TCM_SERIAL_XOVER_SYNC_REP			 // For simple sync, these need to to be scheduled repeatedly.
 		menuTcmCount1.setSendRemoteNeededAll();
 		menuTcmCount2.setSendRemoteNeededAll();
@@ -655,9 +701,15 @@ void CALLBACK_FUNCTION onChangeTcmCount2(int id) {
 }
 
 void CALLBACK_FUNCTION onChangeTcmBaseCCW(int id) {
+#ifdef CONF_EXTRA_ENC3_CCW
+	CCWRotaryEncoder3->setCurrentReading( menuTcmBaseCCW.getCurrentValue() ); // Keep val synced w. diff UIs
+#endif
 }
 
 void CALLBACK_FUNCTION onChangeTcmBaseTCW(int id) {
+#ifdef CONF_EXTRA_ENC2_TCW
+	TCWRotaryEncoder2->setCurrentReading( menuTcmBaseTCW.getCurrentValue() ); // Keep val synced w. diff UIs
+#endif
 }
 
 void CALLBACK_FUNCTION onChangeTcmDebugLED(int id) {
