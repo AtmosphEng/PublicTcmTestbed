@@ -141,6 +141,40 @@
         "visible": true,
         "staticDataInRAM": false
       }
+    },
+    {
+      "parentId": 0,
+      "type": "boolItem",
+      "defaultValue": "false",
+      "item": {
+        "naming": "TRUE_FALSE",
+        "name": "Restart",
+        "variableName": "TcmRestart",
+        "id": 9,
+        "eepromAddress": -1,
+        "functionName": "onChangeTcmRestart",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 0,
+      "type": "textItem",
+      "defaultValue": "default",
+      "item": {
+        "textLength": 5,
+        "itemType": "PLAIN_TEXT",
+        "name": "TargetNum",
+        "variableName": "TcmTargetNum",
+        "id": 8,
+        "eepromAddress": -1,
+        "readOnly": true,
+        "localOnly": true,
+        "visible": true,
+        "staticDataInRAM": false
+      }
     }
   ],
   "codeOptions": {
@@ -150,9 +184,9 @@
     "lastRemoteUuids": [
       "ba23b2a7-040e-40e2-8fae-d45c82cf450b"
     ],
-    "lastThemeUuid": "2F1EAB1E-0469-42C8-A222-BE2DF96D6D81",
+    "lastThemeUuid": "e4524028-edd8-4e0a-ae15-a1f2ba05354f",
     "applicationUUID": "f1cdf4ed-8d8f-469e-b907-91c3e1536fab",
-    "applicationName": "PTcSim 241106 1536",
+    "applicationName": "PTcSim 241111 1501",
     "lastProperties": [
       {
         "name": "DISPLAY_VARIABLE",
@@ -280,6 +314,11 @@
         "subsystem": "THEME"
       },
       {
+        "name": "BORDER_FOR_ACTIONS",
+        "latestValue": "0",
+        "subsystem": "THEME"
+      },
+      {
         "name": "TITLE_SHOW_MODE",
         "latestValue": "TITLE_FIRST_ROW",
         "subsystem": "THEME"
@@ -287,6 +326,11 @@
       {
         "name": "USE_TC_UNICODE",
         "latestValue": "false",
+        "subsystem": "THEME"
+      },
+      {
+        "name": "USE_SLIDER_ANALOG",
+        "latestValue": "true",
         "subsystem": "THEME"
       },
       {

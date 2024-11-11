@@ -1,6 +1,6 @@
 {
   "version": "1.00",
-  "projectName": "PTcmSimple_t7-s3\nembedCONTROL: WiFi STA mode on 192.168.66.11:3333\nARDUINOOTA",
+  "projectName": "PTcmSimple_t7-s3\nembedCONTROL: Serial2 - Wifi:3333",
   "author": "david",
   "items": [
     {
@@ -179,6 +179,23 @@
         "visible": true,
         "staticDataInRAM": false
       }
+    },
+    {
+      "parentId": 0,
+      "type": "textItem",
+      "defaultValue": "",
+      "item": {
+        "textLength": 5,
+        "itemType": "PLAIN_TEXT",
+        "name": "TargetNum",
+        "variableName": "TcmTargetNum",
+        "id": 10,
+        "eepromAddress": -1,
+        "readOnly": true,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
     }
   ],
   "codeOptions": {
@@ -191,7 +208,7 @@
     ],
     "lastThemeUuid": "e4524028-edd8-4e0a-ae15-a1f2ba05354f",
     "applicationUUID": "f1cdf4ed-8d8f-469e-b907-91c3e1536fab",
-    "applicationName": "PTcSim 241023 1508",
+    "applicationName": "PTcSim 241111 1521",
     "lastProperties": [
       {
         "name": "DISPLAY_VARIABLE",
@@ -330,7 +347,7 @@
       },
       {
         "name": "SERIAL_PORT",
-        "latestValue": "Serial",
+        "latestValue": "Serial2",
         "subsystem": "REMOTE"
       },
       {
@@ -387,8 +404,7 @@
       "menuDefinitions": []
     },
     "packageNamespace": "",
-    "appIsModular": false,
-    "listOfEmbeddedForms": []
+    "appIsModular": false
   },
   "stringLists": []
 }

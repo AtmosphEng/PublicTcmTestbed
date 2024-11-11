@@ -73,8 +73,10 @@
 
 #include <Arduino.h>
 #include <SPI.h>
+#include <WiFi.h>
 
 #include "src_menu.h" // for tcMenu
+#include "myConfig.h"
 
 #ifdef INIDEF_ETHERMEGA2560
 #include "Ethernet.h"
@@ -96,12 +98,13 @@
 #include "pin_config-avr-ethermega2560.h" // SPI data LCD interface
 #endif
 
-#if(0) // AAAFIXME
 #ifdef INIDEF_KEYESTUDIO_KS0413
 #include "pin_config-keyestudio-ESP32.h" // SPI data LCD interface
 #endif
-#else
-// #define PIN_DEBUG_LED 19
+
+#ifdef SERIALBT_CLASSIC
+#include <BluetoothSerial.h>
+BluetoothSerial SerialBT;
 #endif
 
 #ifdef INIDEF_LILYGO_T_INTERNET_COM
@@ -130,9 +133,6 @@ APA102<PIN_APA102_DI, PIN_APA102_CLK> ledStrip; // t-embed builtin RGB_LED
 #include "pin_config-t7-s3-esp32-s3.h"
 #endif
 
-#include "myConfig.h"
-#include <WiFi.h>
-
 #ifdef CONF_EXTRA_ENC2_TCW
 HardwareRotaryEncoder* TCWRotaryEncoder2;
 #define DEF_TCM_TCW_ENCODER2 menuTcmBaseTCW // ASSIGN ENCODER2 TO ANALOGMENUITEM.
@@ -146,7 +146,7 @@ HardwareRotaryEncoder* CCWRotaryEncoder3;
 #endif
 
 
-#define MYSERIALX Serial1 // myDebug
+#define MYSERIALX Serial
 
 #ifdef INIDEF_ARDUINOOTA
 #include <ArduinoOTA.h>
@@ -174,7 +174,7 @@ HardwareRotaryEncoder* CCWRotaryEncoder3;
 
 // ANALOG PINS ************************************************************************************
 // A0 used for LCD 16x2 shield for polling / reading all operational buttons via resistor network.
-// A5 used for LCD 16x2 shield (AAA Freetronics pcb mod to relocate D9 to A5)
+// A5 used for LCD 16x2 shield (NB Custom Freetronics pcb mod to relocate D9 to A5)
 
 // encoder0 - slot 0 - for menu navigation
 #define PIN_DUMMY_GROUND_A11	A11 // For Mega wiring convenience of rotary encoder.
@@ -189,9 +189,13 @@ HardwareRotaryEncoder* CCWRotaryEncoder3;
 #define BAUD_SERIAL1 (115200)
 #define BAUD_SERIAL2 (115200)
 
-#define DEF_LED_DELAY 		500
-#define DEF_SERIAL_DELAY	100
+#define DEF_LED_DELAY 							500
+#define DEF_SERIAL_DELAY						100
+#define DEF_BTSERIAL_DELAY_MS				10000
 
+#define DEF_TCM_TASK_SCHEDULE_MS		1000
+#define DEF_DISPLAY_LINE_CHAR_COUNT 16
+#define DEF_NUMBER_BASE							10
 
 int myCount1 = 0;
 int myCount2 = 0;
@@ -337,10 +341,6 @@ void WiFiEvent(WiFiEvent_t event)
 
 //
 void setup() {
-
-	Serial.begin(BAUD_SERIAL1);
-	delay(DEF_SERIAL_DELAY); // Need time here?
-
 #if(0)
 	int incomingByte = 0; // For dumping unwanted initial ESP serial boot message.
 	Serial0.begin(BAUD_SERIAL0);
@@ -353,6 +353,29 @@ void setup() {
 
 //	Serial.println("Serial begin ok. line 1");
 //	Serial.println("Serial begin ok. line 2");
+
+#ifdef INIDEF_LILYGO_T_INTERNET_COM
+																		// Neopixel WS2812 RGB LED init.
+	pixels.begin();										// INITIALIZE NeoPixel strip object (REQUIRED)
+	pixels.show();										// Turn OFF all pixels ASAP
+	pixels.setBrightness(LED_BRIGHTNESS);
+#else
+	pinMode(PIN_DEBUG_LED, OUTPUT); // Common LED name for all targets / controllers. Assign I/O mode to pin.
+#endif
+
+#if(1)
+	debugLED(true); // simple setup routine to provide a double flash of debugLED type installed on target board.
+	delay(DEF_LED_DELAY);	
+	debugLED(false);
+	delay(DEF_LED_DELAY);	
+	debugLED(true);
+	delay(DEF_LED_DELAY);	
+	debugLED(false);
+	delay(DEF_LED_DELAY);	
+#endif
+
+Serial.begin(BAUD_SERIAL1);
+delay(DEF_SERIAL_DELAY); // Need time here?
 
 #ifdef MYSERIAL0_BEGIN
 	MYSERIAL0_BEGIN;
@@ -374,6 +397,86 @@ void setup() {
 	delay(DEF_SERIAL_DELAY); // Need time here?
 #endif
 
+#ifdef SERIALBT_CLASSIC
+	int incomingByteBT = 0; // for incoming BT serial data
+
+#ifdef DEF_BT_MASTER
+	// DEF_SERIALBT.setPin(pin);
+	// DEF_SERIALBT.begin("MYESP32MASTER", true);
+	// DEF_SERIALBT.setPin(pin);
+	// MYSERIAL.println("The device started in master mode, make sure remote BT
+	// device is on!");
+
+	// connect(address) is fast (upto 10 secs max), connect(name) is slow (upto 30
+	// secs max) as it needs to resolve name to address first, but it allows to
+	// connect to different devices with the same name. Set CoreDebugLevel to Info
+	// to view devices bluetooth address and device names connected =
+	// DEF_SERIALBT.connect(name); connected = DEF_SERIALBT.connect(address);
+
+	if (connected) {
+		// MYSERIAL.println("Connected Succesfully!");
+	} else {
+		// while(!DEF_SERIALBT.connected(10000)) {
+		// if(!DEF_SERIALBT.connected(10000)) {
+		if (!DEF_SERIALBT.connected(5000)) {
+			// MYSERIAL.println("Failed to connect. Make sure remote device is
+			// available and in range, then restart app.");
+		}
+	}
+	// disconnect() may take upto 10 secs max
+	if (DEF_SERIALBT.disconnect()) {
+		// MYSERIAL.println("Disconnected Succesfully!");
+	}
+	// this would reconnect to the name(will use address, if resolved) or address
+	// used with connect(name/address).
+	if (DEF_SERIALBT.connect()) {
+		// MYSERIAL.println("Re-connected Succesfully!");
+	}
+#endif
+
+#if (TARGET_NUM == 12) // MASTER - 'M' is 12th letter of alphabet.
+	//const char *pin = "1234"; //<- standard pin would be provided by default
+	bool btConnected;
+
+	SerialBT.begin("MYESP32MASTER", true); // Bluetooth MASTER device name
+  //SerialBT.setPin(pin);
+  Serial.println("The BT device started in master mode, make sure remote BT device was already on first!");
+
+  btConnected = SerialBT.connect(address); // address[] is the MAC of the required BT_SLAVE to connect / pair with.
+    if(btConnected) {
+      Serial.println("setup(): BT Master Connected Succesfully");
+  } else {
+    while( !SerialBT.connected(DEF_BTSERIAL_DELAY_MS) ) {
+      Serial.println("BT Master failed to connect. Make sure remote device is available and in range, then restart app."); 
+    }
+  }
+
+  // disconnect() may take upto 10 secs max
+  if ( SerialBT.disconnect() ) {
+    Serial.println("BT Master Disconnected Succesfully!");
+  }
+  // this would reconnect to the name(will use address, if resolved) or address used with connect(name/address).
+  //if ( SerialBT.connect() ) {
+  if ( SerialBT.connect(address) ) {
+    Serial.println("BT Master re-connected Succesfully!");
+  };
+
+#endif
+
+#if (TARGET_NUM == 5) // SLAVE - '5' looks like S
+	SerialBT.begin("MYESP32SLAVE", false); // Bluetooth SLAVE device name
+	Serial.println("This BT slave MYESP32SLAVE device started, now you can pair it with a bluetooth master!");
+	delay(DEF_BTSERIAL_DELAY_MS); 
+#endif
+
+#if (0) // For Bluetooth binding / pairing with Windows - TEMP
+	while (1){
+		delay(DEF_BTSERIAL_DELAY_MS);
+	}; // INFINITE LOOP
+#endif
+
+#endif // SERIALBT_CLASSIC
+
 
 #ifdef INIDEF_LILYGO_T_EMBED_S3
   pinMode(PIN_POWER_ON, OUTPUT);
@@ -386,6 +489,7 @@ void setup() {
 #define ALPHALIMA_DELAY_MS 2000
 
 #ifdef INIDEF_WIFI_STA
+	IPAddress ip_gway (INIDEF_WIFI_GWAY);
 	IPAddress ip_static (INIDEF_WIFI_IP2);
 	WiFi.mode(WIFI_STA);
 	WiFi.config(ip_static, ip_gway, netmask);
@@ -400,29 +504,13 @@ void setup() {
 #endif
 
 #ifdef INIDEF_WIFI_AP // ESP32 WIFI ACCESS POINT
+	IPAddress ip_gway (INIDEF_WIFI_GWAY);
+	IPAddress ip_static (INIDEF_WIFI_IP2);
 	WiFi.mode(WIFI_AP);
 	WiFi.softAP(ssid, pw); // configure ssid and password for softAP
 	delay(ALPHALIMA_DELAY_MS); // THIS DELAY IS VERY IMPORTANT : comment from AlphaLima www.LK8000.com ?
 	WiFi.softAPConfig(ip_static, ip_gway, netmask); // IP_AP, IP_GATEWAY, MASK. configure ip address for softAP
 #endif
-
-#ifdef INIDEF_LILYGO_T_INTERNET_COM
-																		// Neopixel WS2812 RGB LED init.
-	pixels.begin();										// INITIALIZE NeoPixel strip object (REQUIRED)
-	pixels.show();										// Turn OFF all pixels ASAP
-	pixels.setBrightness(LED_BRIGHTNESS);
-#else
-	pinMode(PIN_DEBUG_LED, OUTPUT); // Common LED name for all targets / controllers. Assign I/O mode to pin.
-#endif
-
-	debugLED(true); // simple setup routine to provide a double flash of debugLED type installed on target board.
-	delay(DEF_LED_DELAY);	
-	debugLED(false);
-	delay(DEF_LED_DELAY);	
-	debugLED(true);
-	delay(DEF_LED_DELAY);	
-	debugLED(false);
-	delay(DEF_LED_DELAY);	
 
 #ifdef INIDEF_LILYGO_T_DISPLAY_S3
 	pinMode(PIN_POWER_ON, OUTPUT);
@@ -432,7 +520,11 @@ void setup() {
 	digitalWrite(PIN_LCD_BL, HIGH);
 #endif
 
-	setupMenu(); // for tcMenu
+	setupMenu(); // for tcMenu ********************************************************************************
+
+	char ascii_id[DEF_DISPLAY_LINE_CHAR_COUNT];
+	itoa(TARGET_NUM, ascii_id, DEF_NUMBER_BASE);
+	menuTcmTargetNum.setTextValue(ascii_id, false); // false means no callback.
 
 #ifdef INIDEF_LILYGO_T_EMBED_S3
 	renderer.turnOffResetLogic(); // Turn off tcmenu cursor reset interval to prevent reset to root position.
@@ -558,15 +650,37 @@ void setup() {
 	switches.setEncoder(DEF_TCM_INDEX_ENCODER3, CCWRotaryEncoder3); // Do not relocate this line.
 #endif
 
-	taskManager.scheduleFixedRate(1000, [] { // ms. Simple way to keep XoverEmbedControl synced after schedule delay.
-#ifdef DEF_TCM_SERIAL_XOVER_SYNC_REP			 // For simple sync, these need to to be scheduled repeatedly.
+	taskManager.scheduleFixedRate(DEF_TCM_TASK_SCHEDULE_MS, [] { // ms. Simple way to keep XoverEmbedControl synced after schedule delay.
+	//taskManager.scheduleFixedRate(500, [] { // ms.
+
+//#ifdef DEF_TCM_SERIAL_XOVER_SYNC_REP			 // debugging
+#if(0)
 		menuTcmCount1.setSendRemoteNeededAll();
 		menuTcmCount2.setSendRemoteNeededAll();
 		menuTcmBaseTCW.setSendRemoteNeededAll();
 		menuTcmBaseCCW.setSendRemoteNeededAll();
 		menuTcmDebugLED.setSendRemoteNeededAll();
 #endif
+
 		menuTcmTimeSec.setCurrentValue(menuTcmTimeSec.getCurrentValue() + 1); // Long way to avoid another variable.
+		
+#ifdef SERIALBT_TRANSPARENT_BRIDGE_FOR_SERIAL2
+		//SerialBT.printf("\r\n ESP_NUM=%d - loop=%d", TARGET_NUM, menuTcmTimeSec.getCurrentValue()); // debugging
+
+		// serial comms between SerialBT and Serial2
+		//if (SerialBT.available()) {
+		while (SerialBT.available()) { // possible infinite loop.
+			Serial2.write(SerialBT.read());
+			//incomingByteBT = SerialBT.read();
+			//Serial2.write(incomingByteBT);
+		}
+
+		while (Serial2.available()) { // possible infinite loop.
+			SerialBT.write(Serial2.read());
+		}
+#endif
+
+
 	});
 
 #if defined(INIDEF_ETHERMEGA2560)
@@ -766,11 +880,6 @@ void CALLBACK_FUNCTION onChangeTcmNeoPixelLedWhite(int id) {
 
 #endif
 
-//
-// END_OF_FILE
-//
-
-
 
 void CALLBACK_FUNCTION onChangeTcmNPixLedWhite(int id) {
     // TODO - your menu change code
@@ -795,3 +904,20 @@ void CALLBACK_FUNCTION onChangeTcmNPixLedGreen(int id) {
 void CALLBACK_FUNCTION onChangeTcmNPixLedBlue(int id) {
     // TODO - your menu change code
 }
+
+#if(0)
+// This callback needs to be implemented by you, see the below docs:
+//  1. List Docs - https://tcmenu.github.io/documentation/arduino-libraries/tc-menu/menu-item-types/list-menu-item/
+//  2. ScrollChoice Docs - https://tcmenu.github.io/documentation/arduino-libraries/tc-menu/menu-item-types/scrollchoice-menu-item/
+int CALLBACK_FUNCTION fnNewRuntimeListRtCall(RuntimeMenuItem* item, uint8_t row, RenderFnMode mode, char* buffer, int bufferSize) {
+    switch(mode) {
+    default:
+        return defaultRtListCallback(item, row, mode, buffer, bufferSize);
+    }
+}
+#endif
+
+
+//
+// END_OF_FILE
+//

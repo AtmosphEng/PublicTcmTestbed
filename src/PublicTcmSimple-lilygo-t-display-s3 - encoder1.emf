@@ -1,6 +1,6 @@
 {
   "version": "1.00",
-  "projectName": "embedCONTROL : esp32wifi",
+  "projectName": "embedCONTROL :  Serial2",
   "author": "david",
   "items": [
     {
@@ -141,6 +141,40 @@
         "visible": true,
         "staticDataInRAM": false
       }
+    },
+    {
+      "parentId": 0,
+      "type": "boolItem",
+      "defaultValue": "false",
+      "item": {
+        "naming": "TRUE_FALSE",
+        "name": "Restart",
+        "variableName": "TcmRestart",
+        "id": 8,
+        "eepromAddress": -1,
+        "functionName": "onChangeTcmRestart",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 0,
+      "type": "textItem",
+      "defaultValue": "",
+      "item": {
+        "textLength": 5,
+        "itemType": "PLAIN_TEXT",
+        "name": "TargetNum",
+        "variableName": "TcmTargetNum",
+        "id": 9,
+        "eepromAddress": -1,
+        "readOnly": true,
+        "localOnly": true,
+        "visible": true,
+        "staticDataInRAM": false
+      }
     }
   ],
   "codeOptions": {
@@ -148,11 +182,12 @@
     "lastDisplayUuid": "e6342680-6fab-4d1b-ac08-ce8dbfc0974c",
     "lastInputUuid": "6dd87e7d-e751-4912-a70d-91793b1d3d87",
     "lastRemoteUuids": [
+      "ba23b2a7-040e-40e2-8fae-d45c82cf450b",
       "46c30011-cac6-4598-a7b8-b0630d55daab"
     ],
-    "lastThemeUuid": "2F1EAB1E-0469-42C8-A222-BE2DF96D6D81",
+    "lastThemeUuid": "e4524028-edd8-4e0a-ae15-a1f2ba05354f",
     "applicationUUID": "f1cdf4ed-8d8f-469e-b907-91c3e1536fab",
-    "applicationName": "PTcSim 241103 1328",
+    "applicationName": "PTcSim 241111 2003",
     "lastProperties": [
       {
         "name": "DISPLAY_VARIABLE",
@@ -246,17 +281,17 @@
       },
       {
         "name": "ENCODER_PIN_A",
-        "latestValue": "2",
+        "latestValue": "44",
         "subsystem": "INPUT"
       },
       {
         "name": "ENCODER_PIN_B",
-        "latestValue": "3",
+        "latestValue": "43",
         "subsystem": "INPUT"
       },
       {
         "name": "ENCODER_PIN_OK",
-        "latestValue": "1",
+        "latestValue": "18",
         "subsystem": "INPUT"
       },
       {
@@ -278,6 +313,16 @@
         "name": "ENCODER_IS_QUARTER_CYCLE",
         "latestValue": "false",
         "subsystem": "INPUT"
+      },
+      {
+        "name": "SERIAL_PORT",
+        "latestValue": "Serial2",
+        "subsystem": "REMOTE"
+      },
+      {
+        "name": "HARDWARE_PORT",
+        "latestValue": "true",
+        "subsystem": "REMOTE"
       },
       {
         "name": "ESPWIFI_CONCURRENT_CONNECTIONS",
@@ -315,6 +360,11 @@
         "subsystem": "THEME"
       },
       {
+        "name": "BORDER_FOR_ACTIONS",
+        "latestValue": "0",
+        "subsystem": "THEME"
+      },
+      {
         "name": "TITLE_SHOW_MODE",
         "latestValue": "TITLE_FIRST_ROW",
         "subsystem": "THEME"
@@ -322,6 +372,11 @@
       {
         "name": "USE_TC_UNICODE",
         "latestValue": "false",
+        "subsystem": "THEME"
+      },
+      {
+        "name": "USE_SLIDER_ANALOG",
+        "latestValue": "true",
         "subsystem": "THEME"
       },
       {
@@ -343,8 +398,7 @@
       "menuDefinitions": []
     },
     "packageNamespace": "",
-    "appIsModular": false,
-    "listOfEmbeddedForms": []
+    "appIsModular": false
   },
   "stringLists": []
 }

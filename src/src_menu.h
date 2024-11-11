@@ -7,4 +7,8 @@
 
 #endif
 
+#include "BluetoothSerial.h"
+extern BluetoothSerial SerialBT;
+
+
 // END_OF_FILE
