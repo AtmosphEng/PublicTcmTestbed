@@ -1,6 +1,6 @@
 {
   "version": "1.00",
-  "projectName": "PublicTcmSimple_ESP32_ILI9341-v2\nembedCONTROL: Serial2",
+  "projectName": "PublicTcmSimple_ESP32_ILI9341-v2\nembedCONTROL: Serial1",
   "author": "david",
   "items": [
     {
@@ -165,11 +165,12 @@
     "lastDisplayUuid": "4dcb12ec-13d8-4466-b8b6-bd575eae4612",
     "lastInputUuid": "6dd87e7d-e751-4912-a70d-91793b1d3d87",
     "lastRemoteUuids": [
-      "ba23b2a7-040e-40e2-8fae-d45c82cf450b"
+      "ba23b2a7-040e-40e2-8fae-d45c82cf450b",
+      "2c101fec-1f7d-4ff3-8d2b-992ad41e7fcb"
     ],
     "lastThemeUuid": "e4524028-edd8-4e0a-ae15-a1f2ba05354f",
     "applicationUUID": "f1cdf4ed-8d8f-469e-b907-91c3e1536fab",
-    "applicationName": "PTcSim 241110 1934",
+    "applicationName": "PTcSim 241112 2040",
     "lastProperties": [
       {
         "name": "DISPLAY_VARIABLE",
@@ -283,7 +284,7 @@
       },
       {
         "name": "SERIAL_PORT",
-        "latestValue": "Serial2",
+        "latestValue": "Serial1",
         "subsystem": "REMOTE"
       },
       {

@@ -154,7 +154,7 @@
         "id": 8,
         "eepromAddress": -1,
         "readOnly": true,
-        "localOnly": false,
+        "localOnly": true,
         "visible": true,
         "staticDataInRAM": false
       }
@@ -170,7 +170,7 @@
     ],
     "lastThemeUuid": "2F1EAB1E-0469-42C8-A222-BE2DF96D6D81",
     "applicationUUID": "f1cdf4ed-8d8f-469e-b907-91c3e1536fab",
-    "applicationName": "PTcmSim 2411111 2019",
+    "applicationName": "PTcmSim 2411112 2149",
     "lastProperties": [
       {
         "name": "ESPWIFI_CONCURRENT_CONNECTIONS",

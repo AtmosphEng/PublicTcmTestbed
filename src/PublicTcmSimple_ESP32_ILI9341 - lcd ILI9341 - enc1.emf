@@ -1,6 +1,6 @@
 {
   "version": "1.00",
-  "projectName": "PTcmSimple_t7-s3\nembedCONTROL: Serial2 - Wifi:3333",
+  "projectName": "PublicTcmSimple_ESP32_ILI9341-v2\nembedCONTROL: none\ntcmenu serial-xover: Serial2",
   "author": "david",
   "items": [
     {
@@ -23,7 +23,7 @@
     {
       "parentId": 0,
       "type": "analogItem",
-      "defaultValue": "99",
+      "defaultValue": "0",
       "item": {
         "maxValue": 255,
         "offset": 0,
@@ -44,7 +44,7 @@
     {
       "parentId": 0,
       "type": "analogItem",
-      "defaultValue": "128",
+      "defaultValue": "0",
       "item": {
         "maxValue": 255,
         "offset": 0,
@@ -127,51 +127,13 @@
     },
     {
       "parentId": 0,
-      "type": "enumItem",
-      "defaultValue": "0",
-      "item": {
-        "enumEntries": [
-          "Serial",
-          "Serial0",
-          "Serial1",
-          "Serial2"
-        ],
-        "name": "EmbedControl",
-        "variableName": "TcmEmbedControl",
-        "id": 9,
-        "eepromAddress": -1,
-        "readOnly": true,
-        "localOnly": false,
-        "visible": true,
-        "staticDataInRAM": false
-      }
-    },
-    {
-      "parentId": 0,
-      "type": "boolItem",
-      "defaultValue": "false",
-      "item": {
-        "naming": "TRUE_FALSE",
-        "name": "RefreshMenu",
-        "variableName": "TcmRefreshMenu",
-        "id": 7,
-        "eepromAddress": -1,
-        "functionName": "onChangeTcmRefreshMenu",
-        "readOnly": false,
-        "localOnly": false,
-        "visible": true,
-        "staticDataInRAM": false
-      }
-    },
-    {
-      "parentId": 0,
       "type": "boolItem",
       "defaultValue": "false",
       "item": {
         "naming": "TRUE_FALSE",
         "name": "Restart",
         "variableName": "TcmRestart",
-        "id": 8,
+        "id": 7,
         "eepromAddress": -1,
         "functionName": "onChangeTcmRestart",
         "readOnly": false,
@@ -183,16 +145,16 @@
     {
       "parentId": 0,
       "type": "textItem",
-      "defaultValue": "",
+      "defaultValue": "defaultValue",
       "item": {
         "textLength": 5,
         "itemType": "PLAIN_TEXT",
         "name": "TargetNum",
         "variableName": "TcmTargetNum",
-        "id": 10,
+        "id": 8,
         "eepromAddress": -1,
         "readOnly": true,
-        "localOnly": true,
+        "localOnly": false,
         "visible": true,
         "staticDataInRAM": false
       }
@@ -203,12 +165,11 @@
     "lastDisplayUuid": "4dcb12ec-13d8-4466-b8b6-bd575eae4612",
     "lastInputUuid": "6dd87e7d-e751-4912-a70d-91793b1d3d87",
     "lastRemoteUuids": [
-      "46c30011-cac6-4598-a7b8-b0630d55daab",
-      "ba23b2a7-040e-40e2-8fae-d45c82cf450b"
+      "2c101fec-1f7d-4ff3-8d2b-992ad41e7fcb"
     ],
     "lastThemeUuid": "e4524028-edd8-4e0a-ae15-a1f2ba05354f",
     "applicationUUID": "f1cdf4ed-8d8f-469e-b907-91c3e1536fab",
-    "applicationName": "PTcSim 241112 1216",
+    "applicationName": "PTcSim 241127 1502",
     "lastProperties": [
       {
         "name": "DISPLAY_VARIABLE",
@@ -237,22 +198,22 @@
       },
       {
         "name": "DISPLAY_CS_PIN",
-        "latestValue": "11",
+        "latestValue": "22",
         "subsystem": "DISPLAY"
       },
       {
         "name": "DISPLAY_RS_PIN",
-        "latestValue": "9",
-        "subsystem": "DISPLAY"
-      },
-      {
-        "name": "DISPLAY_DATA_PIN",
         "latestValue": "21",
         "subsystem": "DISPLAY"
       },
       {
+        "name": "DISPLAY_DATA_PIN",
+        "latestValue": "23",
+        "subsystem": "DISPLAY"
+      },
+      {
         "name": "DISPLAY_CLOCK_PIN",
-        "latestValue": "42",
+        "latestValue": "18",
         "subsystem": "DISPLAY"
       },
       {
@@ -267,7 +228,7 @@
       },
       {
         "name": "UPDATES_PER_SEC",
-        "latestValue": "5",
+        "latestValue": "2",
         "subsystem": "DISPLAY"
       },
       {
@@ -287,17 +248,17 @@
       },
       {
         "name": "ENCODER_PIN_A",
-        "latestValue": "16",
+        "latestValue": "14",
         "subsystem": "INPUT"
       },
       {
         "name": "ENCODER_PIN_B",
-        "latestValue": "18",
+        "latestValue": "27",
         "subsystem": "INPUT"
       },
       {
         "name": "ENCODER_PIN_OK",
-        "latestValue": "15",
+        "latestValue": "26",
         "subsystem": "INPUT"
       },
       {
@@ -319,41 +280,6 @@
         "name": "ENCODER_IS_QUARTER_CYCLE",
         "latestValue": "false",
         "subsystem": "INPUT"
-      },
-      {
-        "name": "ESPWIFI_CONCURRENT_CONNECTIONS",
-        "latestValue": "1",
-        "subsystem": "REMOTE"
-      },
-      {
-        "name": "ESPWIFI_LISTEN_PORT1",
-        "latestValue": "3333",
-        "subsystem": "REMOTE"
-      },
-      {
-        "name": "ESPWIFI_LISTEN_PORT2",
-        "latestValue": "3334",
-        "subsystem": "REMOTE"
-      },
-      {
-        "name": "ESPWIFI_LISTEN_PORT3",
-        "latestValue": "3335",
-        "subsystem": "REMOTE"
-      },
-      {
-        "name": "ESPWIFI_BUFFERED",
-        "latestValue": "true",
-        "subsystem": "REMOTE"
-      },
-      {
-        "name": "SERIAL_PORT",
-        "latestValue": "Serial2",
-        "subsystem": "REMOTE"
-      },
-      {
-        "name": "HARDWARE_PORT",
-        "latestValue": "true",
-        "subsystem": "REMOTE"
       },
       {
         "name": "ITEM_FONT",

@@ -75,8 +75,10 @@
 #include <SPI.h>
 #include <WiFi.h>
 
-#include "src_menu.h" // for tcMenu
-#include "myConfig.h"
+#ifdef SERIALBT_CLASSIC
+#include <BluetoothSerial.h>
+BluetoothSerial SerialBT;
+#endif
 
 #ifdef INIDEF_ETHERMEGA2560
 #include "Ethernet.h"
@@ -90,6 +92,10 @@
 #include "..\..\Credentials\Credentials.h"
 #endif
 
+#include "myDebugPrint.h"
+#include "myConfig.h"
+#include "src_menu.h" // for tcMenu
+
 #ifdef INIDEF_MEGA2560
 #include "pin_config-avr-mega2560.h" // SPI data LCD interface
 #endif
@@ -100,11 +106,6 @@
 
 #ifdef INIDEF_KEYESTUDIO_KS0413
 #include "pin_config-keyestudio-ESP32.h" // SPI data LCD interface
-#endif
-
-#ifdef SERIALBT_CLASSIC
-#include <BluetoothSerial.h>
-BluetoothSerial SerialBT;
 #endif
 
 #ifdef INIDEF_LILYGO_T_INTERNET_COM
@@ -147,6 +148,22 @@ HardwareRotaryEncoder* CCWRotaryEncoder3;
 
 
 #define MYSERIALX Serial
+
+//#define BUF_SIZE 80
+#define BUF_SIZE 1024
+//size_t ethToSerialSize;
+static uint8_t ethToSerialBuf[BUF_SIZE];
+    
+//size_t serialToEthSize;
+static uint8_t serialToEthBuf[BUF_SIZE];
+
+static uint16_t ethToSerialIdx = 0;
+static uint16_t serialToEthIdx = 0;
+//char termination = 0x02;
+//char termination = EOF;
+
+
+WiFiClient tcpClient;
 
 #ifdef INIDEF_ARDUINOOTA
 #include <ArduinoOTA.h>
@@ -378,7 +395,8 @@ Serial.begin(BAUD_SERIAL1);
 delay(DEF_SERIAL_DELAY); // Need time here?
 
 #ifdef MYSERIAL0_BEGIN
-	MYSERIAL0_BEGIN;
+	//MYSERIAL0_BEGIN;
+	Serial0.begin(BAUD_SERIAL1);
 	delay(DEF_SERIAL_DELAY); // Need time here?
 #endif
 
@@ -390,11 +408,18 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 #ifdef MYSERIAL2_BEGIN
 	MYSERIAL2_BEGIN;
 	delay(DEF_SERIAL_DELAY); // Need time here?
+	Serial2.println("Hello from Serial2");
+	Serial2.println("Hello from Serial2");
+	Serial2.println("Hello from Serial2");
 #endif
 
 #ifdef MYSERIAL3_BEGIN
 	MYSERIAL3_BEGIN;
 	delay(DEF_SERIAL_DELAY); // Need time here?
+#endif
+
+#if(0)
+	Serial.println("hello from Serial"); // ESP32-WROOM UART0 is named Serial, and is Tx common with USB serial.
 #endif
 
 #ifdef SERIALBT_CLASSIC
@@ -434,7 +459,7 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 	}
 #endif
 
-#if (TARGET_NUM == 12) // MASTER - 'M' is 12th letter of alphabet.
+#ifdef SERIALBT_MASTER
 	//const char *pin = "1234"; //<- standard pin would be provided by default
 	bool btConnected;
 
@@ -463,7 +488,7 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 
 #endif
 
-#if (TARGET_NUM == 5) // SLAVE - '5' looks like S
+#ifdef SERIALBT_SLAVE
 	SerialBT.begin("MYESP32SLAVE", false); // Bluetooth SLAVE device name
 	Serial.println("This BT slave MYESP32SLAVE device started, now you can pair it with a bluetooth master!");
 	delay(DEF_BTSERIAL_DELAY_MS); 
@@ -522,7 +547,7 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 
 	setupMenu(); // for tcMenu ********************************************************************************
 
-	char ascii_id[DEF_DISPLAY_LINE_CHAR_COUNT];
+	char ascii_id[DEF_DISPLAY_LINE_CHAR_COUNT]; // allocate null-terminated string storage for answer.
 	itoa(TARGET_NUM, ascii_id, DEF_NUMBER_BASE);
 	menuTcmTargetNum.setTextValue(ascii_id, false); // false means no callback.
 
@@ -650,70 +675,195 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 	switches.setEncoder(DEF_TCM_INDEX_ENCODER3, CCWRotaryEncoder3); // Do not relocate this line.
 #endif
 
-	taskManager.scheduleFixedRate(DEF_TCM_TASK_SCHEDULE_MS, [] { // ms. Simple way to keep XoverEmbedControl synced after schedule delay.
+
+if(TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2){ // initialise
+	// serial comms for Serial2 via TCP
+  // start listening for clients
+  tcpServer.begin();
+#ifdef DEF_BYTE_BY_BYTE				
+        MYDEBUGPRINTLN("tcpServer serial bridge transfer is byte-by-byte");
+#else
+        MYDEBUGPRINTLN("tcpServer serial bridge transfer is buffered");
+#endif				
+
+  MYDEBUGPRINT("tcpServer address: ");
+  MYDEBUGPRINTLN(WiFi.localIP());   //inform user about his IP address
+
+#ifdef PIODEF_MEGA2560
+  MYDEBUGPRINTLN(Ethernet.localIP());
+#endif
+
+	tcpClient = tcpServer.available();   // listen for incoming clients
+	bool alreadyConnected = false; // whether or not the client was connected previously
+
+  while (!tcpClient) {
+    // wait for a new client:
+
+    //EthernetClient client = server.available();
+    tcpClient = tcpServer.available();
+
+    // when the client sends the first byte, say hello:
+
+    if (tcpClient) {
+
+      if (!alreadyConnected) {
+
+        // clear out the input buffer:
+        tcpClient.flush();
+        MYDEBUGPRINT("tcpServer accepted a new client at: ");
+        MYDEBUGPRINTLN(tcpClient.remoteIP());
+        //MYDEBUGPRINTLN(tcpClient.localIP());
+        //tcpClient.println("tcpServer says hello to client!"); // this comes out on client USB / Serial OR Serial2?
+        alreadyConnected = true;
+      }
+
+    }
+
+  }
+}
+
+if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2){ // initialise
+	IPAddress myServer(NET_ADDR_BYTE_1, NET_ADDR_BYTE_2, NET_ADDR_SUBNET_BYTE, TARGET_NUM_SERVER); 
+	
+#ifdef DEF_BYTE_BY_BYTE				
+  MYDEBUGPRINTLN("tcpClient serial bridge transfer is byte-by-byte");
+#else
+  MYDEBUGPRINTLN("tcpClient serial bridge transfer is buffered");
+#endif				
+
+	MYDEBUGPRINT("client address: ");
+  MYDEBUGPRINTLN(WiFi.localIP());   // inform user about local IP address
+	
+	MYDEBUGPRINT("client connecting to tcpServer at IP: ");
+  MYDEBUGPRINTLN(myServer);
+
+  // Use WiFiClient class to create TCP connections
+  //WiFiClient client;
+  const int httpPort = DEF_SERVER_PORT;
+  //if (!tcpClient.connect(INIDEF_WIFI_IP_SERVER, httpPort)) {
+  if (!tcpClient.connect(myServer, httpPort)) {
+    MYDEBUGPRINTLN("connection failed");
+    return;
+  }
+#if(0)
+  //MYDEBUGPRINT("Requesting URL: ");
+  //MYDEBUGPRINTLN(url);
+
+  // This will send the request to the server
+  tcpClient.print(String("GET ") + url + " HTTP/1.1\r\n" +
+               "Host: " + host + "\r\n" +
+               "Connection: close\r\n\r\n");
+#endif
+
+#if(0)
+  unsigned long timeout = millis();
+  while (tcpClient.available() == 0) {
+    if (millis() - timeout > 5000) {
+      MYDEBUGPRINTLN(">>> Client Timeout !");
+      tcpClient.stop();
+      return;
+    }
+  }
+
+  // Read all the lines of the reply from server and print them to Serial
+  while (tcpClient.available()) {
+    String line = tcpClient.readStringUntil('\r');
+    MYDEBUGPRINT(line);
+  }
+  MYDEBUGPRINTLN("closing connection?");
+#endif
+
+} // TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2
+
+
+	// Simple way to keep XoverEmbedControl synced after schedule delay.
+	taskManager.scheduleFixedRate(DEF_TCM_TASK_SCHEDULE_MS, [] { // ms. 
 	//taskManager.scheduleFixedRate(500, [] { // ms.
 
-//#ifdef DEF_TCM_SERIAL_XOVER_SYNC_REP			 // debugging
-#if(0)
-		menuTcmCount1.setSendRemoteNeededAll();
-		menuTcmCount2.setSendRemoteNeededAll();
-		menuTcmBaseTCW.setSendRemoteNeededAll();
-		menuTcmBaseCCW.setSendRemoteNeededAll();
-		menuTcmDebugLED.setSendRemoteNeededAll();
-#endif
-
 		menuTcmTimeSec.setCurrentValue(menuTcmTimeSec.getCurrentValue() + 1); // Long way to avoid another variable.
-		
-#ifdef SERIALBT_TRANSPARENT_BRIDGE_FOR_SERIAL2
-		//SerialBT.printf("\r\n ESP_NUM=%d - loop=%d", TARGET_NUM, menuTcmTimeSec.getCurrentValue()); // debugging
 
-		// serial comms between SerialBT and Serial2
-		//if (SerialBT.available()) {
-		while (SerialBT.available()) { // possible infinite loop.
-			Serial2.write(SerialBT.read());
-			//incomingByteBT = SerialBT.read();
-			//Serial2.write(incomingByteBT);
+//		if(TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2){ // repeat
+//		if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2){
+			while (tcpClient.available() > 0) { // possibly infinite loop
+#ifdef DEF_BYTE_BY_BYTE
+				char c = tcpClient.read();
+				Serial2.write(c);
+#else
+				//ethToSerialIdx = tcpClient.readBytesUntil(termination, ethToSerialBuf, (BUF_SIZE - 1) );
+				ethToSerialBuf[ethToSerialIdx] = tcpClient.read();
+				if (ethToSerialIdx < (BUF_SIZE - 1) ) {
+					ethToSerialIdx++;
+				}
+				else
+						break;
+
+			Serial2.write(ethToSerialBuf, ethToSerialIdx);
+			//Serial2.write(termination);
+			ethToSerialIdx = 0; // reset.
+#endif
 		}
 
-		while (Serial2.available()) { // possible infinite loop.
-			SerialBT.write(Serial2.read());
+		//if (Serial2.available() > 0) {
+		while (Serial2.available() > 0) { // possibly infinite loop
+
+#ifdef DEF_BYTE_BY_BYTE
+			char inChar = Serial2.read();
+			tcpClient.write(inChar);
+#else
+				//serialToEthIdx = Serial2.readBytesUntil(termination, serialToEthBuf, (BUF_SIZE - 1));
+				serialToEthBuf[serialToEthIdx] = Serial2.read();
+				if (serialToEthIdx < (BUF_SIZE - 1)) {
+					serialToEthIdx++;
+				}
+				else
+						break;
+
+			tcpClient.write(serialToEthBuf, serialToEthIdx);
+			//tcpClient.write(termination);
+			serialToEthIdx = 0; // reset index.
+#endif
+		}
+
+#if(0)
+		if(SERIALBT_TRANSPARENT_BRIDGE_FOR_SERIAL2){ // repeat
+
+			// serial comms between SerialBT and Serial2
+			//if (SerialBT.available()) {
+			while (SerialBT.available()) { // possible infinite loop.
+				Serial2.write(SerialBT.read());
+			}
+
+			while (Serial2.available()) { // possible infinite loop.
+				SerialBT.write(Serial2.read());
+			}
 		}
 #endif
 
+	}); // tail of taskManager.scheduleFixedRate ...
 
-	});
+
 
 #if defined(INIDEF_ETHERMEGA2560)
   // You can use Ethernet.init(pin) to configure the CS pin
-
   Ethernet.init(PIN_ETHERNET_CS);  // Most Arduino shields
-
   //Ethernet.init(5);   // MKR ETH shield
-
   //Ethernet.init(0);   // Teensy 2.0
-
   //Ethernet.init(20);  // Teensy++ 2.0
-
   //Ethernet.init(15);  // ESP8266 with Adafruit Featherwing Ethernet
-
   //Ethernet.init(33);  // ESP32 with Adafruit Featherwing Ethernet
 
   // initialize the ethernet device
-
   //Ethernet.begin(myMAC, myETHWiredStaticIP, myDNS, myGateway, mySubnet);
   Ethernet.begin(myMAC, myETHWiredStaticIP);
 
 
   // Check for Ethernet hardware present
-
   if (Ethernet.hardwareStatus() == EthernetNoHardware) {
-
     MYSERIALX.println("Ethernet shield was not found.  Sorry, can't run without hardware. :(");
 
     while (true) {
       delay(1); // do nothing, no point running without Ethernet hardware
     }
-
   }
 
   if (Ethernet.linkStatus() == LinkOFF) {
@@ -793,18 +943,78 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 	ArduinoOTA.begin();
 #endif
 
-} // setup)(
+
+} // setup
 
 
 //
 void loop() {
 	taskManager.runLoop();
 
+#if(0)
+if(TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2){
+	// serial comms for Serial2 via TCP
+	tcpServer.begin();
+
+	WiFiClient tcpClient = tcpServer.available();   // listen for incoming clients
+
+	if (tcpClient) {                             // if you get a tcpClient,
+		MYDEBUGPRINTLN("New Client.");           // print a message out the serial port
+		String currentLine = "";                // make a String to hold incoming data from the tcpClient
+		while (tcpClient.connected()) {            // loop while the tcpClient's connected
+			if (tcpClient.available()) {             // if there's bytes to read from the tcpClient,
+				char c = tcpClient.read();             // read a byte, then
+				MYDEBUGWRITE(c);              			// print it out the serial monitor
+				if (c == '\n') {                    // if the byte is a newline character
+
+					// if the current line is blank, you got two newline characters in a row.
+					// that's the end of the tcpClient HTTP request, so send a response:
+					if (currentLine.length() == 0) {
+						// HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
+						// and a content-type so the tcpClient knows what's coming, then a blank line:
+						tcpClient.println("HTTP/1.1 200 OK");
+						tcpClient.println("Content-type:text/html");
+						tcpClient.println();
+
+						// the content of the HTTP response follows the header:
+						tcpClient.print("Click <a href=\"/H\">here</a> to turn the LED on pin 19 on.<br>");
+						tcpClient.print("Click <a href=\"/L\">here</a> to turn the LED on pin 19 off.<br>");
+
+						// The HTTP response ends with another blank line:
+						tcpClient.println();
+						// break out of the while loop:
+						break;
+					} else {    // if you got a newline, then clear currentLine:
+						currentLine = "";
+					}
+				} else if (c != '\r') {  // if you got anything else but a carriage return character,
+					currentLine += c;      // add it to the end of the currentLine
+				}
+
+				// Check to see if the tcpClient request was "GET /H" or "GET /L":
+				if (currentLine.endsWith("GET /H")) {
+					digitalWrite(19, HIGH);               // GET /H turns the LED on
+				}
+				if (currentLine.endsWith("GET /L")) {
+					digitalWrite(19, LOW);                // GET /L turns the LED off
+				}
+			}
+		}
+		// close the connection:
+		tcpClient.stop();
+		MYDEBUGPRINTLN("Client Disconnected.");
+	}
+}
+#endif
+
+
 #ifdef INIDEF_ARDUINOOTA
 	ArduinoOTA.handle();
 #endif
 } // loop
 //
+
+// CALLBACK FUNCTION(s) *************************************************************************************
 
 void CALLBACK_FUNCTION onChangeTcmCount1(int id) {
 	myCount1++;
