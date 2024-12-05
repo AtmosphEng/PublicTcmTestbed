@@ -22,6 +22,23 @@
     },
     {
       "parentId": 0,
+      "type": "textItem",
+      "defaultValue": "",
+      "item": {
+        "textLength": 5,
+        "itemType": "IP_ADDRESS",
+        "name": "MyIP",
+        "variableName": "TcmMyIP",
+        "id": 9,
+        "eepromAddress": -1,
+        "readOnly": false,
+        "localOnly": true,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 0,
       "type": "analogItem",
       "defaultValue": "0",
       "item": {
@@ -155,7 +172,7 @@
         "eepromAddress": -1,
         "readOnly": true,
         "localOnly": false,
-        "visible": true,
+        "visible": false,
         "staticDataInRAM": false
       }
     }
@@ -169,7 +186,7 @@
     ],
     "lastThemeUuid": "e4524028-edd8-4e0a-ae15-a1f2ba05354f",
     "applicationUUID": "f1cdf4ed-8d8f-469e-b907-91c3e1536fab",
-    "applicationName": "PTcSim 241127 1502",
+    "applicationName": "PTcSim 241127 1902",
     "lastProperties": [
       {
         "name": "DISPLAY_VARIABLE",

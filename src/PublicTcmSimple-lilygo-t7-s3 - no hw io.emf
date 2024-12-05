@@ -1,7 +1,7 @@
 {
   "version": "1.00",
-  "projectName": "PublicTcmSimple_t7-s3\nno external hw io.\nembedCONTROL: Serial2 - Wifi 33:3333",
-  "author": "david",
+  "projectName": "PublicTcmSimple_t7-s3 - no hw UI\nembedCONTROL: Serial2",
+  "author": "localuser",
   "items": [
     {
       "parentId": 0,
@@ -14,6 +14,23 @@
         "id": 5,
         "eepromAddress": -1,
         "functionName": "onChangeTcmDebugLED",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 0,
+      "type": "textItem",
+      "defaultValue": "",
+      "item": {
+        "textLength": 5,
+        "itemType": "IP_ADDRESS",
+        "name": "MyIP",
+        "variableName": "TcmMyIP",
+        "id": 9,
+        "eepromAddress": -1,
         "readOnly": false,
         "localOnly": false,
         "visible": true,
@@ -165,38 +182,12 @@
     "lastDisplayUuid": "cdd0be35-f6ff-40ae-86fc-f9d04a6e8679",
     "lastInputUuid": "89cd7f70-0457-4884-97c2-0db904ccb0ba",
     "lastRemoteUuids": [
-      "46c30011-cac6-4598-a7b8-b0630d55daab",
       "ba23b2a7-040e-40e2-8fae-d45c82cf450b"
     ],
     "lastThemeUuid": "2F1EAB1E-0469-42C8-A222-BE2DF96D6D81",
     "applicationUUID": "f1cdf4ed-8d8f-469e-b907-91c3e1536fab",
-    "applicationName": "PTcmSim 2411112 2149",
+    "applicationName": "PTcmSim 241205 1735",
     "lastProperties": [
-      {
-        "name": "ESPWIFI_CONCURRENT_CONNECTIONS",
-        "latestValue": "1",
-        "subsystem": "REMOTE"
-      },
-      {
-        "name": "ESPWIFI_LISTEN_PORT1",
-        "latestValue": "3333",
-        "subsystem": "REMOTE"
-      },
-      {
-        "name": "ESPWIFI_LISTEN_PORT2",
-        "latestValue": "3334",
-        "subsystem": "REMOTE"
-      },
-      {
-        "name": "ESPWIFI_LISTEN_PORT3",
-        "latestValue": "3335",
-        "subsystem": "REMOTE"
-      },
-      {
-        "name": "ESPWIFI_BUFFERED",
-        "latestValue": "true",
-        "subsystem": "REMOTE"
-      },
       {
         "name": "SERIAL_PORT",
         "latestValue": "Serial2",

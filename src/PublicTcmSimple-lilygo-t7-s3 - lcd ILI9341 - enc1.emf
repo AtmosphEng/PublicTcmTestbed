@@ -1,7 +1,7 @@
 {
   "version": "1.00",
-  "projectName": "PTcmSimple_t7-s3\nembedCONTROL: Serial2 - Wifi:3333",
-  "author": "david",
+  "projectName": "PTcmSimple_t7-s3 - lcd LIL9341 - enc1\nembedCONTROL: Serial2 - Wifi:3333",
+  "author": "localuser",
   "items": [
     {
       "parentId": 0,
@@ -14,6 +14,23 @@
         "id": 5,
         "eepromAddress": -1,
         "functionName": "onChangeTcmDebugLED",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 0,
+      "type": "textItem",
+      "defaultValue": "",
+      "item": {
+        "textLength": 5,
+        "itemType": "IP_ADDRESS",
+        "name": "MyIP",
+        "variableName": "TcmMyIP",
+        "id": 11,
+        "eepromAddress": -1,
         "readOnly": false,
         "localOnly": false,
         "visible": true,
@@ -208,7 +225,7 @@
     ],
     "lastThemeUuid": "e4524028-edd8-4e0a-ae15-a1f2ba05354f",
     "applicationUUID": "f1cdf4ed-8d8f-469e-b907-91c3e1536fab",
-    "applicationName": "PTcSim 241112 1216",
+    "applicationName": "PTcSim 241205 1733",
     "lastProperties": [
       {
         "name": "DISPLAY_VARIABLE",

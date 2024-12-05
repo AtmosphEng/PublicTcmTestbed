@@ -73,6 +73,7 @@
 
 #include <Arduino.h>
 #include <SPI.h>
+#include <esp_wifi.h> // for esp_read_mac() etc.
 #include <WiFi.h>
 
 #ifdef SERIALBT_CLASSIC
@@ -95,6 +96,15 @@ BluetoothSerial SerialBT;
 #include "myDebugPrint.h"
 #include "myConfig.h"
 #include "src_menu.h" // for tcMenu
+
+
+#ifdef ARDUINO_ARCH_AVR
+#include <Servo.h>
+#endif
+
+#ifdef ARDUINO_ARCH_ESP32
+#include <ESP32Servo.h>
+#endif
 
 #ifdef INIDEF_MEGA2560
 #include "pin_config-avr-mega2560.h" // SPI data LCD interface
@@ -148,6 +158,8 @@ HardwareRotaryEncoder* CCWRotaryEncoder3;
 
 
 #define MYSERIALX Serial
+
+Servo myServoValve; // create servo object to control a servo
 
 //#define BUF_SIZE 80
 #define BUF_SIZE 1024
@@ -537,6 +549,9 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 	WiFi.softAPConfig(ip_static, ip_gway, netmask); // IP_AP, IP_GATEWAY, MASK. configure ip address for softAP
 #endif
 
+	menuTcmMyIP.setIpAddress(INIDEF_WIFI_IP2);
+	esp_wifi_set_channel(WIFI_RADIO_CHANNEL, WIFI_SECOND_CHAN_NONE); // should be called after esp_wifi_start()
+
 #ifdef INIDEF_LILYGO_T_DISPLAY_S3
 	pinMode(PIN_POWER_ON, OUTPUT);
 	digitalWrite(PIN_POWER_ON, HIGH);
@@ -687,7 +702,8 @@ if(TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2){ // initialise
 #endif				
 
   MYDEBUGPRINT("tcpServer address: ");
-  MYDEBUGPRINTLN(WiFi.localIP());   //inform user about his IP address
+  //MYDEBUGPRINTLN(WiFi.localIP());   //inform user about local IP address (STA class)
+  MYDEBUGPRINTLN(WiFi.softAPIP());   //inform user about soft AP IP address
 
 #ifdef PIODEF_MEGA2560
   MYDEBUGPRINTLN(Ethernet.localIP());
@@ -896,6 +912,7 @@ if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2){ // initialise
   MYSERIALX.println(Ethernet.localIP());
 #endif
 
+  myServoValve.attach(PIN_SERVO_AIR_VALVE);
 
 #ifdef INIDEF_ARDUINOOTA
 	// Port defaults to 3232
@@ -1016,8 +1033,15 @@ if(TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2){
 
 // CALLBACK FUNCTION(s) *************************************************************************************
 
+
+void CALLBACK_FUNCTION onChangeTcmDebugLED(int id) {
+	debugLED(menuTcmDebugLED.getBoolean());
+}
+
+
 void CALLBACK_FUNCTION onChangeTcmCount1(int id) {
-	myCount1++;
+	//myCount1++;
+	myServoValve.write(menuTcmCount1.getIntValueIncludingOffset());
 }
 
 void CALLBACK_FUNCTION onChangeTcmCount2(int id) {
@@ -1035,11 +1059,6 @@ void CALLBACK_FUNCTION onChangeTcmBaseTCW(int id) {
 	TCWRotaryEncoder2->setCurrentReading( menuTcmBaseTCW.getCurrentValue() ); // Keep val synced w. diff UIs
 #endif
 }
-
-void CALLBACK_FUNCTION onChangeTcmDebugLED(int id) {
-	debugLED(menuTcmDebugLED.getBoolean());
-}
-
 
 void CALLBACK_FUNCTION onChangeTcmTimeSec(int id) {
 }
