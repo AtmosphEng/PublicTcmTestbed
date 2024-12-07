@@ -73,8 +73,11 @@
 
 #include <Arduino.h>
 #include <SPI.h>
+
+#ifndef ARDUINO_ARCH_AVR
 #include <esp_wifi.h> // for esp_read_mac() etc.
 #include <WiFi.h>
+#endif
 
 #ifdef SERIALBT_CLASSIC
 #include <BluetoothSerial.h>
@@ -89,7 +92,7 @@ BluetoothSerial SerialBT;
 #include <ETH.h>
 #endif
 
-#ifndef INIDEF_MEGA2560
+#ifndef ARDUINO_ARCH_AVR
 #include "..\..\Credentials\Credentials.h"
 #endif
 
@@ -161,6 +164,7 @@ HardwareRotaryEncoder* CCWRotaryEncoder3;
 
 Servo myServoValve; // create servo object to control a servo
 
+#ifdef NONWIFI_BUILD
 //#define BUF_SIZE 80
 #define BUF_SIZE 1024
 //size_t ethToSerialSize;
@@ -174,8 +178,8 @@ static uint16_t serialToEthIdx = 0;
 //char termination = 0x02;
 //char termination = EOF;
 
-
 WiFiClient tcpClient;
+#endif
 
 #ifdef INIDEF_ARDUINOOTA
 #include <ArduinoOTA.h>
@@ -549,8 +553,10 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 	WiFi.softAPConfig(ip_static, ip_gway, netmask); // IP_AP, IP_GATEWAY, MASK. configure ip address for softAP
 #endif
 
+#ifdef NONWIFI_BUILD
 	menuTcmMyIP.setIpAddress(INIDEF_WIFI_IP2);
 	esp_wifi_set_channel(WIFI_RADIO_CHANNEL, WIFI_SECOND_CHAN_NONE); // should be called after esp_wifi_start()
+#endif
 
 #ifdef INIDEF_LILYGO_T_DISPLAY_S3
 	pinMode(PIN_POWER_ON, OUTPUT);
@@ -562,9 +568,11 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 
 	setupMenu(); // for tcMenu ********************************************************************************
 
+#ifdef NONWIFI_BUILD
 	char ascii_id[DEF_DISPLAY_LINE_CHAR_COUNT]; // allocate null-terminated string storage for answer.
 	itoa(TARGET_NUM, ascii_id, DEF_NUMBER_BASE);
 	menuTcmTargetNum.setTextValue(ascii_id, false); // false means no callback.
+#endif
 
 #ifdef INIDEF_LILYGO_T_EMBED_S3
 	renderer.turnOffResetLogic(); // Turn off tcmenu cursor reset interval to prevent reset to root position.
@@ -690,6 +698,7 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 	switches.setEncoder(DEF_TCM_INDEX_ENCODER3, CCWRotaryEncoder3); // Do not relocate this line.
 #endif
 
+#ifdef NONWIFI_BUILD
 
 if(TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2){ // initialise
 	// serial comms for Serial2 via TCP
@@ -736,7 +745,7 @@ if(TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2){ // initialise
     }
 
   }
-}
+} // TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2
 
 if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2){ // initialise
 	IPAddress myServer(NET_ADDR_BYTE_1, NET_ADDR_BYTE_2, NET_ADDR_SUBNET_BYTE, TARGET_NUM_SERVER); 
@@ -791,7 +800,9 @@ if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2){ // initialise
 
 } // TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2
 
+#endif // NONWIFI_BUILD
 
+#ifdef NONWIFI_BUILD
 	// Simple way to keep XoverEmbedControl synced after schedule delay.
 	taskManager.scheduleFixedRate(DEF_TCM_TASK_SCHEDULE_MS, [] { // ms. 
 	//taskManager.scheduleFixedRate(500, [] { // ms.
@@ -856,10 +867,11 @@ if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2){ // initialise
 #endif
 
 	}); // tail of taskManager.scheduleFixedRate ...
+#endif // NONWIFI_BUILD
 
 
 
-#if defined(INIDEF_ETHERMEGA2560)
+#ifdef INIDEF_ETHERMEGA2560
   // You can use Ethernet.init(pin) to configure the CS pin
   Ethernet.init(PIN_ETHERNET_CS);  // Most Arduino shields
   //Ethernet.init(5);   // MKR ETH shield
@@ -888,7 +900,10 @@ if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2){ // initialise
   // start listening for clients
 
   MYSERIALX.println(Ethernet.localIP());
-#endif
+
+  MYSERIALX.println(Ethernet.localIP());
+
+#endif // INIDEF_ETHERMEGA2560
 
 #ifdef INIDEF_LILYGO_T_INTERNET_COM
   WiFi.onEvent(WiFiEvent);
@@ -908,9 +923,6 @@ if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2){ // initialise
 
   //MYSERIALX.print("Chat myServer address:");
 
-#ifdef INIDEF_ETHERMEGA2560
-  MYSERIALX.println(Ethernet.localIP());
-#endif
 
   myServoValve.attach(PIN_SERVO_AIR_VALVE);
 

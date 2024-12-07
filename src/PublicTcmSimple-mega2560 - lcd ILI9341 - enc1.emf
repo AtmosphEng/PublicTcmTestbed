@@ -1,7 +1,7 @@
 {
   "version": "1.00",
   "projectName": "PublicTcmSimple-mega2560 - lcd ILI9341 - enc1\n",
-  "author": "david",
+  "author": "localuser",
   "items": [
     {
       "parentId": 0,
@@ -169,7 +169,7 @@
     ],
     "lastThemeUuid": "2F1EAB1E-0469-42C8-A222-BE2DF96D6D81",
     "applicationUUID": "f1cdf4ed-8d8f-469e-b907-91c3e1536fab",
-    "applicationName": "PTcSim 241018 2042",
+    "applicationName": "PTcSim 241207 2243",
     "lastProperties": [
       {
         "name": "DISPLAY_VARIABLE",
@@ -325,8 +325,7 @@
       "menuDefinitions": []
     },
     "packageNamespace": "",
-    "appIsModular": false,
-    "listOfEmbeddedForms": []
+    "appIsModular": false
   },
   "stringLists": []
 }

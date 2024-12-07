@@ -16,11 +16,14 @@
 //#define DEF_BYTE_BY_BYTE // else its buffered
 
 // ENABLE ONLY ONE OF THE FOLLOWING BUILD TYPES
-#define NORMAL_BUILD
+//#define NONWIFI_BUILD
 //#define TCP_SERVER_BUILD
 //#define TCP_CLIENT_BUILD
 
-#define NETWORK_NETCOMM			// else its esp32AP
+// ENABLE ONE OR NONE OF THE FOLLOWING BUILD TYPES
+//#define NETWORK_NETCOMM
+//#define NETWORK_ESP32_AP
+
 
 const bool SERIALBT_TRANSPARENT_BRIDGE_FOR_SERIAL2 = false;
 
@@ -33,22 +36,29 @@ const unsigned int WIFI_RADIO_CHANNEL = 13; // For WIFI-AP or ESP-NOW: choose a 
 #define NET_ADDR_SUBNET_BYTE 20
 char ssid[] = netcomm24_wifi_ssid;
 char pw[] = netcomm24_wifi_pw;
-#else
+#endif
+
+#ifdef NETWORK_ESP32_AP
 #define NET_ADDR_SUBNET_BYTE 66
 char ssid[] = esp32AP_wifi_ssid;
 char pw[] = esp32AP_wifi_pw;
 #endif
 
-//#define TARGET_NUM_SERVER		1 // AAAFIXME only if WIFI-AP
+#ifdef NETWORK_ESP32_AP
+#define TARGET_NUM_SERVER		1 // only if WIFI-AP
+#else
 #define TARGET_NUM_SERVER		13
+#endif
+
 #define TARGET_NUM_AP 			TARGET_NUM_SERVER
 #define TARGET_NUM_CLIENT		14
 
-#ifdef NORMAL_BUILD
+#ifdef NONWIFI_BUILD
 const bool TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2 = false;
 const bool TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2 = false;
 #define TCP_INIT
 #define INIDEF_WIFI_STA
+
 #if(0)
 #define INIDEF_WIFI_IP2 			NET_ADDR_BYTE_1,NET_ADDR_BYTE_2,NET_ADDR_SUBNET_BYTE,TARGET_NUM_SERVER
 #define TARGET_NUM TARGET_NUM_SERVER
@@ -73,7 +83,7 @@ const bool TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2 = false;
 //#define INIDEF_WIFI_IP2 NET_ADDR_BYTE_1,NET_ADDR_BYTE_2,NET_ADDR_SUBNET_BYTE,1 // make same as gway
 #endif
 
-#endif
+#endif // TCP_SERVER_BUILD
 
 #ifdef TCP_CLIENT_BUILD
 const bool TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2 = false;
