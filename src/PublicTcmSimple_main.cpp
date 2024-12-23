@@ -109,6 +109,10 @@ BluetoothSerial SerialBT;
 #include <ESP32Servo.h>
 #endif
 
+#ifdef INIDEF_UNO
+#include "pin_config-avr-uno.h" // SPI data LCD interface
+#endif
+
 #ifdef INIDEF_MEGA2560
 #include "pin_config-avr-mega2560.h" // SPI data LCD interface
 #endif
@@ -119,6 +123,10 @@ BluetoothSerial SerialBT;
 
 #ifdef INIDEF_KEYESTUDIO_KS0413
 #include "pin_config-keyestudio-ESP32.h" // SPI data LCD interface
+#endif
+
+#ifdef INIDEF_CYD
+#include "pin_config-cyd.h" // SPI data LCD interface
 #endif
 
 #ifdef INIDEF_LILYGO_T_INTERNET_COM
@@ -187,7 +195,7 @@ WiFiClient tcpClient;
 #include <WiFiUdp.h>
 #endif
 
-#ifdef ARDUINO_ARCH_AVR
+#if defined(ARDUINO_ARCH_AVR) && !defined(INIDEF_UNO)
 #define PIN_DUMMY_GROUND_D20	20 // For Mega wiring convenience of Serial1 cable.
 #define PIN_DUMMY_GROUND_D21	21 // For Mega wiring convenience of Serial2 cable.
 
@@ -578,7 +586,7 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 	renderer.turnOffResetLogic(); // Turn off tcmenu cursor reset interval to prevent reset to root position.
 #endif
 
-#ifdef ARDUINO_ARCH_AVR
+#if defined(ARDUINO_ARCH_AVR) && !defined(INIDEF_UNO)
 	//digitalWrite(IO_PIN_53, OUTPUT); // Mega Slave Select (SS)
 
 	digitalWrite(PIN_DUMMY_GROUND_D20, LOW); // For wiring convenience on Mega for Serial1 cable with adjacent ground
@@ -655,7 +663,7 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 		menuTcmCount2.setCurrentValue(myCount2);
 	});
 
-#endif // ARDUINO_ARCH_AVR
+#endif // defined(ARDUINO_ARCH_AVR) && !defined(INIDEF_UNO)
 
 #if(0)
 #define DEF_TCM_SERIAL_XOVER_SYNC_ONCE
