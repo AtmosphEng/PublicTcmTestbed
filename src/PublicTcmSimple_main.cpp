@@ -697,12 +697,10 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 	//pinMode(PIN_ENC3_OK, INPUT_PULLUP); // Not required.
 
 	CCWRotaryEncoder3 = new HardwareRotaryEncoder
-	// (PIN_IO01_ENC3_A_TCW__STRAPPING_T7S3_A09_YELLOW, PIN_IO06_ENC3_B_TCW_T7S3_A10_GREEN, 
-	(PIN_ENC3_B, PIN_ENC3_A, 
-	[](int valueEncoder3) { 
+	(PIN_ENC3_B, PIN_ENC3_A, [](int valueEncoder3) { 
 			// no current action on the pushbutton switch press, change the menu using encoder rotation only.
 		DEF_TCM_CCW_ENCODER3.setCurrentValue(valueEncoder3);
-	});
+	} , HWACCEL_NONE) ; // last param assigns rotary encoder acceleration mode.
 	CCWRotaryEncoder3->changePrecision(DEF_TCM_CCW_ENCODER3.getMaximumValue(), DEF_TCM_CCW_ENCODER3.getCurrentValue() );
 	switches.setEncoder(DEF_TCM_INDEX_ENCODER3, CCWRotaryEncoder3); // Do not relocate this line.
 #endif

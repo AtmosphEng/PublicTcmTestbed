@@ -1,7 +1,7 @@
 {
   "version": "1.00",
   "projectName": "tcMenu ip: 2-buttons\nembedCONTROL : Serial2",
-  "author": "david",
+  "author": "localuser",
   "items": [
     {
       "parentId": 0,
@@ -65,10 +65,10 @@
     {
       "parentId": 0,
       "type": "analogItem",
-      "defaultValue": "0",
+      "defaultValue": "1000",
       "item": {
-        "maxValue": 255,
-        "offset": 0,
+        "maxValue": 2000,
+        "offset": -1000,
         "divisor": 1,
         "unitName": "",
         "step": 1,
@@ -88,7 +88,7 @@
       "type": "analogItem",
       "defaultValue": "0",
       "item": {
-        "maxValue": 255,
+        "maxValue": 30,
         "offset": 0,
         "divisor": 1,
         "unitName": "",
@@ -186,7 +186,7 @@
     ],
     "lastThemeUuid": "e4524028-edd8-4e0a-ae15-a1f2ba05354f",
     "applicationUUID": "f1cdf4ed-8d8f-469e-b907-91c3e1536fab",
-    "applicationName": "PTcSim 241111 1501",
+    "applicationName": "PTcSim 250114 2110",
     "lastProperties": [
       {
         "name": "DISPLAY_VARIABLE",
@@ -341,7 +341,7 @@
     ],
     "namingRecursive": true,
     "useCppMain": true,
-    "saveLocation": "PROJECT_TO_CURRENT_WITH_GENERATED",
+    "saveLocation": "PROJECT_TO_SRC_WITH_GENERATED",
     "usingSizedEEPROMStorage": false,
     "eepromDefinition": "",
     "authenticatorDefinition": "",

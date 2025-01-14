@@ -7,10 +7,10 @@
 #define DEF_TCM_OPERATIONAL // for pin_config file(s)
 
 // EXTRA ENCODER(S)
-#if(0)
-#define CONF_EXTRA_ENC2_TCW // TCWRotaryEncoder2 - NOT defined in TcmDesigner
+//#if(0)
+//#define CONF_EXTRA_ENC2_TCW // TCWRotaryEncoder2 - NOT defined in TcmDesigner
 #define CONF_EXTRA_ENC3_CCW // CCWRotaryEncoder3 - NOT defined in TcmDesigner
-#endif
+//#endif
 
 // NETWORK COMMS ***************************************************************************************
 
@@ -70,7 +70,8 @@ const bool TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2 = false;
 #endif
 
 #ifdef TCP_SERVER_BUILD
-const bool TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2 = true;
+//const bool TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2 = true;
+const bool TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2 = false;
 const bool TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2 = false;
 #define TCP_INIT
 #define TARGET_NUM TARGET_NUM_SERVER
