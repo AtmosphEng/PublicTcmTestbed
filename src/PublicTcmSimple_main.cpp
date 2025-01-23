@@ -74,6 +74,7 @@
 
 #include <Arduino.h>
 #include <SPI.h>
+#include <SwitchInput.h> // tcMenu-switches
 
 #ifndef ARDUINO_ARCH_AVR
 #include <esp_wifi.h> // for esp_read_mac() etc.
@@ -381,6 +382,19 @@ void WiFiEvent(WiFiEvent_t event)
 #endif
 
 
+void CALLBACK_FUNCTION onActivation(uint8_t pin, bool heldDown){ // tcMenu-switches - if heldDown false, then action
+	//if(heldDown == false){ // i.e. 'pressed' i.e. one activation regardless of pressing time. works as logic toggle.
+	if(heldDown == true){ // i.e. 'pressed' i.e. one activation regardless of pressing time. works as logic toggle.
+		menuTcmCount1.setCurrentValue(menuTcmCount1.getCurrentValue() + 1); // increment value.
+		
+		menuTcmBaseCCW.setCurrentValue(100); // AAAFIXME reset incremental linear encoder to '0'.
+		CCWRotaryEncoder3->setCurrentReading(100);
+		//delay(1000); 
+		//vTaskDelay(1000/portTICK_PERIOD_MS); // TaskDelay of x millisec. AAAMAGIC
+	}
+}
+
+
 //
 void setup() {
 #if(0)
@@ -538,13 +552,14 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 
 #define ALPHALIMA_DELAY_MS 2000
 
-#ifdef INIDEF_WIFI_STA
+#ifdef DEF_WIFI_STA
 	IPAddress ip_gway (INIDEF_WIFI_GWAY);
 	IPAddress ip_static (INIDEF_WIFI_IP2);
 	WiFi.mode(WIFI_STA);
 	WiFi.config(ip_static, ip_gway, netmask);
 	WiFi.begin(ssid, pw);
 	delay(ALPHALIMA_DELAY_MS); // THIS DELAY IS VERY IMPORTANT : comment from AlphaLima www.LK8000.com ?
+	menuTcmMyIP.setIpAddress(((ip_static.toString()).c_str())); // convert to string then convert to const char*
 
 #if(0)
 	Serial.print("ESP Board MAC Address:  "); // 2024-04-05 testing for wifi on t-display-s3
@@ -553,18 +568,19 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 
 #endif
 
-#ifdef INIDEF_WIFI_AP // ESP32 WIFI ACCESS POINT
+#ifdef DEF_WIFI_AP // ESP32 WIFI ACCESS POINT
 	IPAddress ip_gway (INIDEF_WIFI_GWAY);
 	IPAddress ip_static (INIDEF_WIFI_IP2);
 	WiFi.mode(WIFI_AP);
 	WiFi.softAP(ssid, pw); // configure ssid and password for softAP
 	delay(ALPHALIMA_DELAY_MS); // THIS DELAY IS VERY IMPORTANT : comment from AlphaLima www.LK8000.com ?
 	WiFi.softAPConfig(ip_static, ip_gway, netmask); // IP_AP, IP_GATEWAY, MASK. configure ip address for softAP
+	menuTcmMyIP.setIpAddress(((ip_static.toString()).c_str())); // convert to string then convert to const char*
 #endif
 
 #ifdef NONWIFI_BUILD
 	menuTcmMyIP.setIpAddress(INIDEF_WIFI_IP2);
-	esp_wifi_set_channel(WIFI_RADIO_CHANNEL, WIFI_SECOND_CHAN_NONE); // should be called after esp_wifi_start()
+	//esp_wifi_set_channel(WIFI_RADIO_CHANNEL, WIFI_SECOND_CHAN_NONE); // should be called after esp_wifi_start()
 #endif
 
 #ifdef INIDEF_LILYGO_T_DISPLAY_S3
@@ -576,6 +592,12 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 #endif
 
 	setupMenu(); // for tcMenu ********************************************************************************
+
+
+#ifdef INIDEF_LILYGO_T_DISPLAY_S3 // AAAFIXME
+ 	switches.init(asIoRef(internalDigitalDevice()), SWITCHES_NO_POLLING, true); // use intr?(IOtype, read via, pull-up)
+	switches.addSwitch(PIN_ENC2_B, onActivation, NO_REPEAT); // tcMenu-switches
+#endif
 
 #ifdef NONWIFI_BUILD
 	char ascii_id[DEF_DISPLAY_LINE_CHAR_COUNT]; // allocate null-terminated string storage for answer.
@@ -987,6 +1009,8 @@ if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2){ // initialise
 void loop() {
 	taskManager.runLoop();
 
+//	delay(10); // time allowance for background processing.
+
 #if(0)
 if(TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2){
 	// serial comms for Serial2 via TCP
@@ -1047,6 +1071,7 @@ if(TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2){
 #ifdef INIDEF_ARDUINOOTA
 	ArduinoOTA.handle();
 #endif
+
 } // loop
 //
 

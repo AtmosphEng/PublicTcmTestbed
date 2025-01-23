@@ -17,21 +17,31 @@
 //#define DEF_BYTE_BY_BYTE // else its buffered
 
 // ENABLE ONLY ONE OF THE FOLLOWING BUILD TYPES
-//#define NONWIFI_BUILD
+//
 #define TCP_SERVER_BUILD
 //#define TCP_CLIENT_BUILD
 
-// ENABLE ONE OR NONE OF THE FOLLOWING BUILD TYPES
-#define NETWORK_NETCOMM
-//#define NETWORK_ESP32_AP
+// ENABLE ONE OR NONE OF THE FOLLOWING NETWORK SERVERS
+//
+//#define NETWORK_NETCOMM
+#define NETWORK_HOTSPOT
+
+// ENABLE ONLY ONE OF THE FOLLOWING WIFI TYPES
+//
+//#define NONWIFI_BUILD
+#define DEF_WIFI_STA
+//#define DEF_WIFI_AP
 
 
 const bool SERIALBT_TRANSPARENT_BRIDGE_FOR_SERIAL2 = false;
 
-const unsigned int WIFI_RADIO_CHANNEL = 13; // For WIFI-AP or ESP-NOW: choose a fixed Wifi channel between 1 and 13.
+//const unsigned int WIFI_RADIO_CHANNEL = 11; // For WIFI-AP or ESP-NOW: choose a fixed Wifi channel between 1 and 13.
+//const unsigned int WIFI_RADIO_CHANNEL = 13; // For WIFI-AP or ESP-NOW: choose a fixed Wifi channel between 1 and 13.
 
-#define NET_ADDR_BYTE_1			192
-#define NET_ADDR_BYTE_2		 	168
+//#define NET_ADDR_BYTE_1			192
+//#define NET_ADDR_BYTE_2		 	168
+#define NET_ADDR_BYTE_1			10
+#define NET_ADDR_BYTE_2		 	42
 
 #ifdef NETWORK_NETCOMM
 #define NET_ADDR_SUBNET_BYTE 20
@@ -39,26 +49,29 @@ char ssid[] = netcomm24_wifi_ssid;
 char pw[] = netcomm24_wifi_pw;
 #endif
 
-#ifdef NETWORK_ESP32_AP
-#define NET_ADDR_SUBNET_BYTE 66
-char ssid[] = esp32AP_wifi_ssid;
-char pw[] = esp32AP_wifi_pw;
+#ifdef NETWORK_HOTSPOT
+#define NET_ADDR_SUBNET_BYTE 0 // to suit Ubuntu wifi hotspot.
+//#define NET_ADDR_SUBNET_BYTE 33 // for linear encoder testing.
+//#define NET_ADDR_SUBNET_BYTE 66 // for tcmenu serial xover embedded remote control.
+//#define NET_ADDR_SUBNET_BYTE 137 // to suit Windows wifi hotspot.
+char ssid[] = hotspot2_wifi_ssid;
+char pw[] = hotspot2_wifi_pw;
 #endif
 
-#ifdef NETWORK_ESP32_AP
+#ifdef DEF_WIFI_AP
 #define TARGET_NUM_SERVER		1 // only if WIFI-AP
 #else
-#define TARGET_NUM_SERVER		13
+#define TARGET_NUM_SERVER		17 // was 13
 #endif
 
-#define TARGET_NUM_AP 			TARGET_NUM_SERVER
+//#define TARGET_NUM_AP 			TARGET_NUM_SERVER
 #define TARGET_NUM_CLIENT		14
 
 #ifdef NONWIFI_BUILD
 const bool TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2 = false;
 const bool TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2 = false;
 #define TCP_INIT
-#define INIDEF_WIFI_STA
+//#define DEF_WIFI_STA
 
 #if(0)
 #define INIDEF_WIFI_IP2 			NET_ADDR_BYTE_1,NET_ADDR_BYTE_2,NET_ADDR_SUBNET_BYTE,TARGET_NUM_SERVER
@@ -76,24 +89,15 @@ const bool TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2 = false;
 #define TCP_INIT
 #define TARGET_NUM TARGET_NUM_SERVER
 #define INIDEF_WIFI_IP2 NET_ADDR_BYTE_1,NET_ADDR_BYTE_2,NET_ADDR_SUBNET_BYTE,TARGET_NUM_SERVER
-#define INIDEF_WIFI_STA
 
-#ifndef NETWORK_NETCOMM
-#define INIDEF_WIFI_AP
-#undef INIDEF_WIFI_STA // belt and braces
-//#undef INIDEF_WIFI_IP2
-//#define INIDEF_WIFI_IP2 NET_ADDR_BYTE_1,NET_ADDR_BYTE_2,NET_ADDR_SUBNET_BYTE,1 // make same as gway
-#endif
 
 #endif // TCP_SERVER_BUILD
 
 #ifdef TCP_CLIENT_BUILD
 const bool TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2 = false;
 const bool TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2 = true;
-#define TCP_INIT
+//#define TCP_INIT
 #define TARGET_NUM TARGET_NUM_CLIENT
-#define INIDEF_WIFI_STA
-#undef INIDEF_WIFI_AP // belt and braces
 #define INIDEF_WIFI_IP2 			NET_ADDR_BYTE_1,NET_ADDR_BYTE_2,NET_ADDR_SUBNET_BYTE,TARGET_NUM_CLIENT
 #define INIDEF_WIFI_IP_SERVER NET_ADDR_BYTE_1,NET_ADDR_BYTE_2,NET_ADDR_SUBNET_BYTE,TARGET_NUM_SERVER
 #endif
@@ -101,8 +105,8 @@ const bool TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2 = true;
 #ifdef TCP_INIT
 #define INIDEF_WIFI_GWAY NET_ADDR_BYTE_1,NET_ADDR_BYTE_2,NET_ADDR_SUBNET_BYTE,1 	// default gateway
 IPAddress netmask(255, 255, 255, 0); 				// default
-#define DEF_SERVER_PORT 80
-WiFiServer tcpServer(DEF_SERVER_PORT);
+//#define DEF_SERVER_PORT 80
+//WiFiServer tcpServer(DEF_SERVER_PORT);
 #endif
 
 

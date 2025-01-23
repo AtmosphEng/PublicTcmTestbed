@@ -1,6 +1,6 @@
 {
   "version": "1.00",
-  "projectName": "tcMenu ip: 2-buttons\nembedCONTROL : Serial2",
+  "projectName": "embedCONTROL :  Serial2",
   "author": "localuser",
   "items": [
     {
@@ -65,10 +65,10 @@
     {
       "parentId": 0,
       "type": "analogItem",
-      "defaultValue": "1000",
+      "defaultValue": "0",
       "item": {
-        "maxValue": 2000,
-        "offset": -1000,
+        "maxValue": 255,
+        "offset": 0,
         "divisor": 1,
         "unitName": "",
         "step": 1,
@@ -88,7 +88,7 @@
       "type": "analogItem",
       "defaultValue": "0",
       "item": {
-        "maxValue": 30,
+        "maxValue": 255,
         "offset": 0,
         "divisor": 1,
         "unitName": "",
@@ -150,7 +150,7 @@
         "naming": "TRUE_FALSE",
         "name": "Restart",
         "variableName": "TcmRestart",
-        "id": 9,
+        "id": 8,
         "eepromAddress": -1,
         "functionName": "onChangeTcmRestart",
         "readOnly": false,
@@ -162,16 +162,33 @@
     {
       "parentId": 0,
       "type": "textItem",
-      "defaultValue": "default",
+      "defaultValue": "",
       "item": {
         "textLength": 5,
         "itemType": "PLAIN_TEXT",
         "name": "TargetNum",
         "variableName": "TcmTargetNum",
-        "id": 8,
+        "id": 9,
         "eepromAddress": -1,
         "readOnly": true,
         "localOnly": true,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 0,
+      "type": "textItem",
+      "defaultValue": "",
+      "item": {
+        "textLength": 5,
+        "itemType": "IP_ADDRESS",
+        "name": "MyIP",
+        "variableName": "TcmMyIP",
+        "id": 10,
+        "eepromAddress": -1,
+        "readOnly": true,
+        "localOnly": false,
         "visible": true,
         "staticDataInRAM": false
       }
@@ -180,13 +197,13 @@
   "codeOptions": {
     "embeddedPlatform": "ARDUINO_ESP32",
     "lastDisplayUuid": "e6342680-6fab-4d1b-ac08-ce8dbfc0974c",
-    "lastInputUuid": "560E5382-52C6-4641-BB2B-5C9A9DE06785",
+    "lastInputUuid": "6dd87e7d-e751-4912-a70d-91793b1d3d87",
     "lastRemoteUuids": [
-      "ba23b2a7-040e-40e2-8fae-d45c82cf450b"
+      "2c101fec-1f7d-4ff3-8d2b-992ad41e7fcb"
     ],
     "lastThemeUuid": "e4524028-edd8-4e0a-ae15-a1f2ba05354f",
     "applicationUUID": "f1cdf4ed-8d8f-469e-b907-91c3e1536fab",
-    "applicationName": "PTcSim 250114 2110",
+    "applicationName": "PTcSim 250123 1547",
     "lastProperties": [
       {
         "name": "DISPLAY_VARIABLE",
@@ -270,7 +287,7 @@
       },
       {
         "name": "SW_POLLING_MODE",
-        "latestValue": "SWITCHES_POLL_EVERYTHING",
+        "latestValue": "SWITCHES_NO_POLLING",
         "subsystem": "INPUT"
       },
       {
@@ -279,13 +296,28 @@
         "subsystem": "INPUT"
       },
       {
-        "name": "ENCODER_UP_PIN",
-        "latestValue": "0",
+        "name": "ENCODER_PIN_A",
+        "latestValue": "44",
         "subsystem": "INPUT"
       },
       {
-        "name": "ENCODER_DOWN_PIN",
-        "latestValue": "14",
+        "name": "ENCODER_PIN_B",
+        "latestValue": "43",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "ENCODER_PIN_OK",
+        "latestValue": "16",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "ENCODER_BACK_PIN",
+        "latestValue": "-1",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "ENCODER_NEXT_PIN",
+        "latestValue": "-1",
         "subsystem": "INPUT"
       },
       {
@@ -294,14 +326,9 @@
         "subsystem": "INPUT"
       },
       {
-        "name": "SERIAL_PORT",
-        "latestValue": "Serial2",
-        "subsystem": "REMOTE"
-      },
-      {
-        "name": "HARDWARE_PORT",
-        "latestValue": "true",
-        "subsystem": "REMOTE"
+        "name": "ENCODER_IS_QUARTER_CYCLE",
+        "latestValue": "false",
+        "subsystem": "INPUT"
       },
       {
         "name": "ITEM_FONT",
