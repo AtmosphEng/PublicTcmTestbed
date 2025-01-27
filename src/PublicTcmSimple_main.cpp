@@ -454,9 +454,11 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 #ifdef MYSERIAL2_BEGIN
 	MYSERIAL2_BEGIN;
 	delay(DEF_SERIAL_DELAY); // Need time here?
+#if(0)
 	Serial2.println("Hello from Serial2");
 	Serial2.println("Hello from Serial2");
 	Serial2.println("Hello from Serial2");
+#endif
 #endif
 
 #ifdef MYSERIAL3_BEGIN
@@ -843,7 +845,7 @@ if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIALV){ // initialise
 #ifdef COMMS_BRIDGE
 	// Simple way to keep XoverEmbedControl synced after schedule delay.
 	//taskManager.scheduleFixedRate(DEF_TCM_TASK_SCHEDULE_MS, [] { // ms. 
-	taskManager.scheduleFixedRate(2, [] { // ms. AAATEST
+	taskManager.scheduleFixedRate(1000, [] { // ms. AAATEST
 	//taskManager.scheduleFixedRate(500, [] { // ms.
 
 	//menuTcmTimeSec.setCurrentValue(menuTcmTimeSec.getCurrentValue() + 1); // Avoid using another variable.
@@ -853,9 +855,11 @@ if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIALV){ // initialise
 	//if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIALV){
 
 	//while (tcpClient.available() > 0) { // possibly infinite loop
-	if (1) { // AAATEST
+	//if (1) { // AAATEST
 	//if (myCom0com.available() > 0) { // AAATEST
+	//Serial2.println(myCom0com.available()); // AAATEST
 	//while (myCom0com.available() > 0) { // possibly infinite loop AAATEST
+	while (myCom0com.availableFIFOTx() > 0) { // possibly infinite loop AAATEST
 	//while (Serial2.available() > 0) { // possibly infinite loop AAATEST ******************* AAAFIXME
 
 #ifdef DEF_BYTE_BY_BYTE
@@ -869,7 +873,8 @@ if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIALV){ // initialise
 		//ethToSerialIdx = tcpClient.readBytesUntil(termination, ethToSerialBuf, (BUF_SIZE - 1) );
 
 		//ethToSerialBuf[ethToSerialIdx] = tcpClient.read();
-		ethToSerialBuf[ethToSerialIdx] = Serial2.read(); // AAATEST
+		ethToSerialBuf[ethToSerialIdx] = myCom0com.writeDequeue_IE_READ();; // AAATEST
+		//Serial2.write(ethToSerialBuf[ethToSerialIdx]); // AAATEST
 
 		if (ethToSerialIdx < (BUF_SIZE - 1) ) {
 			ethToSerialIdx++;
@@ -877,12 +882,14 @@ if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIALV){ // initialise
 		else
 			break;
 
-		myCom0com.write(ethToSerialBuf, ethToSerialIdx);
+		//Serial2.write(ethToSerialBuf, ethToSerialIdx);
 		//SerialS.write(ethToSerialBuf, ethToSerialIdx);
 		//myCom0com.write(termination);
-		ethToSerialIdx = 0; // reset.
+		//ethToSerialIdx = 0; // reset.
 #endif
 	} // while (tcpClient.available() > 0)
+	Serial2.write(ethToSerialBuf, ethToSerialIdx);
+	ethToSerialIdx = 0; // reset for next time.
 #endif // AAATEST
 
 
@@ -898,8 +905,7 @@ if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIALV){ // initialise
 		myCom0com.readEnqueue_IE_WRITE(inChar);
 #else
 		//serialToEthIdx = myCom0com.readBytesUntil(termination, serialToEthBuf, (BUF_SIZE - 1));
-		serialToEthBuf[serialToEthIdx] = myCom0com.read();
-		//serialToEthBuf[serialToEthIdx] = SerialS.read();
+		serialToEthBuf[serialToEthIdx] = Serial2.read();
 		if (serialToEthIdx < (BUF_SIZE - 1)) {
 			serialToEthIdx++;
 		}
@@ -907,13 +913,16 @@ if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIALV){ // initialise
 			break;
 
 		//tcpClient.write(serialToEthBuf, serialToEthIdx);
-		Serial2.write(serialToEthBuf, serialToEthIdx); // AAATEST
+		//Serial2.write(serialToEthBuf, serialToEthIdx); // AAATEST
 
 		//tcpClient.write(termination);
-		serialToEthIdx = 0; // reset index.
+		//serialToEthIdx = 0; // reset index.
 #endif
 	} // while (Serial2.available() > 0)
+		myCom0com.readBytesEnqueue_IE_WRITE(serialToEthBuf, serialToEthIdx); // AAATEST
+		serialToEthIdx = 0; // reset index.
 #endif // AAATEST
+
 
 #if(0)
 		if(SERIALBT_TRANSPARENT_BRIDGE_FOR_SERIALZ){ // repeat

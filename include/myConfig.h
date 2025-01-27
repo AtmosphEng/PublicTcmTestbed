@@ -18,7 +18,7 @@
 const bool SERIALBT_TRANSPARENT_BRIDGE_FOR_SERIALZ = false;
 
 
-#define DEF_BYTE_BY_BYTE // else its buffered
+//#define DEF_BYTE_BY_BYTE // else its buffered
 
 // ENABLE ONLY ONE OF THE FOLLOWING BUILD TYPES
 //
