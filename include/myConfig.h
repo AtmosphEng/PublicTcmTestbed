@@ -9,12 +9,16 @@
 // EXTRA ENCODER(S)
 //#if(0)
 //#define CONF_EXTRA_ENC2_TCW // TCWRotaryEncoder2 - NOT defined in TcmDesigner
-#define CONF_EXTRA_ENC3_CCW // CCWRotaryEncoder3 - NOT defined in TcmDesigner
+//#define CONF_EXTRA_ENC3_CCW // CCWRotaryEncoder3 - NOT defined in TcmDesigner
 //#endif
 
 // NETWORK COMMS ***************************************************************************************
 
-//#define DEF_BYTE_BY_BYTE // else its buffered
+// BLUETOOTH
+const bool SERIALBT_TRANSPARENT_BRIDGE_FOR_SERIALZ = false;
+
+
+#define DEF_BYTE_BY_BYTE // else its buffered
 
 // ENABLE ONLY ONE OF THE FOLLOWING BUILD TYPES
 //
@@ -23,25 +27,22 @@
 
 // ENABLE ONE OR NONE OF THE FOLLOWING NETWORK SERVERS
 //
-//#define NETWORK_NETCOMM
-#define NETWORK_HOTSPOT
+#define NETWORK_NETCOMM
+//#define NETWORK_HOTSPOT
 
-// ENABLE ONLY ONE OF THE FOLLOWING WIFI TYPES
-//
-//#define NONWIFI_BUILD
+#define NONWIFI_BUILD
 #define DEF_WIFI_STA
 //#define DEF_WIFI_AP
 
 
-const bool SERIALBT_TRANSPARENT_BRIDGE_FOR_SERIAL2 = false;
 
 //const unsigned int WIFI_RADIO_CHANNEL = 11; // For WIFI-AP or ESP-NOW: choose a fixed Wifi channel between 1 and 13.
 //const unsigned int WIFI_RADIO_CHANNEL = 13; // For WIFI-AP or ESP-NOW: choose a fixed Wifi channel between 1 and 13.
 
-//#define NET_ADDR_BYTE_1			192
-//#define NET_ADDR_BYTE_2		 	168
-#define NET_ADDR_BYTE_1			10
-#define NET_ADDR_BYTE_2		 	42
+#define NET_ADDR_BYTE_1			192
+#define NET_ADDR_BYTE_2		 	168
+//#define NET_ADDR_BYTE_1			10
+//#define NET_ADDR_BYTE_2		 	42
 
 #ifdef NETWORK_NETCOMM
 #define NET_ADDR_SUBNET_BYTE 20
@@ -68,12 +69,12 @@ char pw[] = hotspot2_wifi_pw;
 #define TARGET_NUM_CLIENT		14
 
 #ifdef NONWIFI_BUILD
-const bool TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2 = false;
-const bool TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2 = false;
+//const bool TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIALV = false;
+//const bool TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIALV = false;
 #define TCP_INIT
 //#define DEF_WIFI_STA
 
-#if(0)
+#if(1) // AAAFIXME
 #define INIDEF_WIFI_IP2 			NET_ADDR_BYTE_1,NET_ADDR_BYTE_2,NET_ADDR_SUBNET_BYTE,TARGET_NUM_SERVER
 #define TARGET_NUM TARGET_NUM_SERVER
 #else
@@ -83,9 +84,9 @@ const bool TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2 = false;
 #endif
 
 #ifdef TCP_SERVER_BUILD
-//const bool TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2 = true;
-const bool TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2 = false;
-const bool TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2 = false;
+const bool TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIALV = true;
+//const bool TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIALV = false;
+const bool TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIALV = false;
 #define TCP_INIT
 #define TARGET_NUM TARGET_NUM_SERVER
 #define INIDEF_WIFI_IP2 NET_ADDR_BYTE_1,NET_ADDR_BYTE_2,NET_ADDR_SUBNET_BYTE,TARGET_NUM_SERVER
@@ -94,8 +95,8 @@ const bool TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2 = false;
 #endif // TCP_SERVER_BUILD
 
 #ifdef TCP_CLIENT_BUILD
-const bool TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2 = false;
-const bool TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2 = true;
+const bool TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIALV = false;
+const bool TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIALV = true;
 //#define TCP_INIT
 #define TARGET_NUM TARGET_NUM_CLIENT
 #define INIDEF_WIFI_IP2 			NET_ADDR_BYTE_1,NET_ADDR_BYTE_2,NET_ADDR_SUBNET_BYTE,TARGET_NUM_CLIENT
@@ -106,7 +107,8 @@ const bool TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2 = true;
 #define INIDEF_WIFI_GWAY NET_ADDR_BYTE_1,NET_ADDR_BYTE_2,NET_ADDR_SUBNET_BYTE,1 	// default gateway
 IPAddress netmask(255, 255, 255, 0); 				// default
 //#define DEF_SERVER_PORT 80
-//WiFiServer tcpServer(DEF_SERVER_PORT);
+#define DEF_SERVER_PORT 3333 // for tcMenu embedControl tcpip
+WiFiServer tcpServer(DEF_SERVER_PORT);
 #endif
 
 
@@ -118,7 +120,7 @@ IPAddress netmask(255, 255, 255, 0); 				// default
 #endif
 
 
-#if(0) // its SERIALBT
+#if(0) // its SERIALBT BLUETOOTH
 #define SERIALBT_CLASSIC
 #if(1)
 #define SERIALBT_MASTER

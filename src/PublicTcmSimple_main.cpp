@@ -76,6 +76,11 @@
 #include <SPI.h>
 #include <SwitchInput.h> // tcMenu-switches
 
+#include "../../libraries/VirtSerial/src/VirtSerial.h"
+
+VirtSerial myCom0com(1); // my class object. Virtual serial port needs no initialiser so use arbitrary number ?
+
+
 #ifndef ARDUINO_ARCH_AVR
 #include <esp_wifi.h> // for esp_read_mac() etc.
 #include <WiFi.h>
@@ -171,6 +176,7 @@ HardwareRotaryEncoder* CCWRotaryEncoder3;
 
 
 #define MYSERIALX Serial
+
 
 Servo myServoValve; // create servo object to control a servo
 
@@ -382,6 +388,7 @@ void WiFiEvent(WiFiEvent_t event)
 #endif
 
 
+#ifdef MY_TCMENU_SWITCH
 void CALLBACK_FUNCTION onActivation(uint8_t pin, bool heldDown){ // tcMenu-switches - if heldDown false, then action
 	//if(heldDown == false){ // i.e. 'pressed' i.e. one activation regardless of pressing time. works as logic toggle.
 	if(heldDown == true){ // i.e. 'pressed' i.e. one activation regardless of pressing time. works as logic toggle.
@@ -393,7 +400,7 @@ void CALLBACK_FUNCTION onActivation(uint8_t pin, bool heldDown){ // tcMenu-switc
 		//vTaskDelay(1000/portTICK_PERIOD_MS); // TaskDelay of x millisec. AAAMAGIC
 	}
 }
-
+#endif
 
 //
 void setup() {
@@ -594,7 +601,7 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 	setupMenu(); // for tcMenu ********************************************************************************
 
 
-#ifdef INIDEF_LILYGO_T_DISPLAY_S3 // AAAFIXME
+#ifdef MY_TCMENU_SWITCH
  	switches.init(asIoRef(internalDigitalDevice()), SWITCHES_NO_POLLING, true); // use intr?(IOtype, read via, pull-up)
 	switches.addSwitch(PIN_ENC2_B, onActivation, NO_REPEAT); // tcMenu-switches
 #endif
@@ -729,8 +736,8 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 
 #ifdef NONWIFI_BUILD
 
-if(TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2){ // initialise
-	// serial comms for Serial2 via TCP
+if(0) { // AAATEST
+//if(TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIALV){ // initialise
   // start listening for clients
   tcpServer.begin();
 #ifdef DEF_BYTE_BY_BYTE				
@@ -740,8 +747,8 @@ if(TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2){ // initialise
 #endif				
 
   MYDEBUGPRINT("tcpServer address: ");
-  //MYDEBUGPRINTLN(WiFi.localIP());   //inform user about local IP address (STA class)
-  MYDEBUGPRINTLN(WiFi.softAPIP());   //inform user about soft AP IP address
+  MYDEBUGPRINTLN(WiFi.localIP());   //inform user about local IP address (STA class)
+  //MYDEBUGPRINTLN(WiFi.softAPIP());   //inform user about soft AP IP address
 
 #ifdef PIODEF_MEGA2560
   MYDEBUGPRINTLN(Ethernet.localIP());
@@ -766,17 +773,17 @@ if(TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2){ // initialise
         tcpClient.flush();
         MYDEBUGPRINT("tcpServer accepted a new client at: ");
         MYDEBUGPRINTLN(tcpClient.remoteIP());
-        //MYDEBUGPRINTLN(tcpClient.localIP());
-        //tcpClient.println("tcpServer says hello to client!"); // this comes out on client USB / Serial OR Serial2?
+        MYDEBUGPRINTLN(tcpClient.localIP());
+        tcpClient.println("tcpServer says hello to client!"); // this comes out on client USB / Serial OR Serial2?
         alreadyConnected = true;
       }
 
     }
 
   }
-} // TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2
+} // TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIALV
 
-if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2){ // initialise
+if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIALV){ // initialise
 	IPAddress myServer(NET_ADDR_BYTE_1, NET_ADDR_BYTE_2, NET_ADDR_SUBNET_BYTE, TARGET_NUM_SERVER); 
 	
 #ifdef DEF_BYTE_BY_BYTE				
@@ -785,10 +792,10 @@ if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2){ // initialise
   MYDEBUGPRINTLN("tcpClient serial bridge transfer is buffered");
 #endif				
 
-	MYDEBUGPRINT("client address: ");
+  MYDEBUGPRINT("client address: ");
   MYDEBUGPRINTLN(WiFi.localIP());   // inform user about local IP address
 	
-	MYDEBUGPRINT("client connecting to tcpServer at IP: ");
+  MYDEBUGPRINT("client connecting to tcpServer at IP: ");
   MYDEBUGPRINTLN(myServer);
 
   // Use WiFiClient class to create TCP connections
@@ -799,6 +806,7 @@ if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2){ // initialise
     MYDEBUGPRINTLN("connection failed");
     return;
   }
+
 #if(0)
   //MYDEBUGPRINT("Requesting URL: ");
   //MYDEBUGPRINTLN(url);
@@ -827,77 +835,103 @@ if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2){ // initialise
   MYDEBUGPRINTLN("closing connection?");
 #endif
 
-} // TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2
+} // TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIALV
 
 #endif // NONWIFI_BUILD
 
-#ifdef NONWIFI_BUILD
+#define COMMS_BRIDGE
+#ifdef COMMS_BRIDGE
 	// Simple way to keep XoverEmbedControl synced after schedule delay.
-	taskManager.scheduleFixedRate(DEF_TCM_TASK_SCHEDULE_MS, [] { // ms. 
+	//taskManager.scheduleFixedRate(DEF_TCM_TASK_SCHEDULE_MS, [] { // ms. 
+	taskManager.scheduleFixedRate(2, [] { // ms. AAATEST
 	//taskManager.scheduleFixedRate(500, [] { // ms.
 
-		menuTcmTimeSec.setCurrentValue(menuTcmTimeSec.getCurrentValue() + 1); // Long way to avoid another variable.
+	//menuTcmTimeSec.setCurrentValue(menuTcmTimeSec.getCurrentValue() + 1); // Avoid using another variable.
 
-//		if(TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2){ // repeat
-//		if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL2){
-			while (tcpClient.available() > 0) { // possibly infinite loop
-#ifdef DEF_BYTE_BY_BYTE
-				char c = tcpClient.read();
-				Serial2.write(c);
-#else
-				//ethToSerialIdx = tcpClient.readBytesUntil(termination, ethToSerialBuf, (BUF_SIZE - 1) );
-				ethToSerialBuf[ethToSerialIdx] = tcpClient.read();
-				if (ethToSerialIdx < (BUF_SIZE - 1) ) {
-					ethToSerialIdx++;
-				}
-				else
-						break;
+#if(1) // AAATEST
+	// WIFI READING then SERIAL WRITING ***********************************************************
+	//if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIALV){
 
-			Serial2.write(ethToSerialBuf, ethToSerialIdx);
-			//Serial2.write(termination);
-			ethToSerialIdx = 0; // reset.
-#endif
-		}
-
-		//if (Serial2.available() > 0) {
-		while (Serial2.available() > 0) { // possibly infinite loop
+	//while (tcpClient.available() > 0) { // possibly infinite loop
+	if (1) { // AAATEST
+	//if (myCom0com.available() > 0) { // AAATEST
+	//while (myCom0com.available() > 0) { // possibly infinite loop AAATEST
+	//while (Serial2.available() > 0) { // possibly infinite loop AAATEST ******************* AAAFIXME
 
 #ifdef DEF_BYTE_BY_BYTE
-			char inChar = Serial2.read();
-			tcpClient.write(inChar);
+		//char c = tcpClient.read();
+		//SerialS.write(c);
+		char c = myCom0com.writeDequeue_IE_READ();
+		//char c = 'X';
+		if(c != 0) // if not NUL
+			Serial2.write(c); // AAATEST
 #else
-				//serialToEthIdx = Serial2.readBytesUntil(termination, serialToEthBuf, (BUF_SIZE - 1));
-				serialToEthBuf[serialToEthIdx] = Serial2.read();
-				if (serialToEthIdx < (BUF_SIZE - 1)) {
-					serialToEthIdx++;
-				}
-				else
-						break;
+		//ethToSerialIdx = tcpClient.readBytesUntil(termination, ethToSerialBuf, (BUF_SIZE - 1) );
 
-			tcpClient.write(serialToEthBuf, serialToEthIdx);
-			//tcpClient.write(termination);
-			serialToEthIdx = 0; // reset index.
-#endif
+		//ethToSerialBuf[ethToSerialIdx] = tcpClient.read();
+		ethToSerialBuf[ethToSerialIdx] = Serial2.read(); // AAATEST
+
+		if (ethToSerialIdx < (BUF_SIZE - 1) ) {
+			ethToSerialIdx++;
 		}
+		else
+			break;
+
+		myCom0com.write(ethToSerialBuf, ethToSerialIdx);
+		//SerialS.write(ethToSerialBuf, ethToSerialIdx);
+		//myCom0com.write(termination);
+		ethToSerialIdx = 0; // reset.
+#endif
+	} // while (tcpClient.available() > 0)
+#endif // AAATEST
+
+
+#if(1) // AAATEST
+	// SERIAL READING then WIFI WRITING ***********************************************************
+	//if (SerialS.available() > 0) {
+	while (Serial2.available() > 0) { // possibly infinite loop
+
+#ifdef DEF_BYTE_BY_BYTE
+		//char inChar = SerialS.read();
+		//tcpClient.write(inChar);
+		char inChar = Serial2.read();
+		myCom0com.readEnqueue_IE_WRITE(inChar);
+#else
+		//serialToEthIdx = myCom0com.readBytesUntil(termination, serialToEthBuf, (BUF_SIZE - 1));
+		serialToEthBuf[serialToEthIdx] = myCom0com.read();
+		//serialToEthBuf[serialToEthIdx] = SerialS.read();
+		if (serialToEthIdx < (BUF_SIZE - 1)) {
+			serialToEthIdx++;
+		}
+		else
+			break;
+
+		//tcpClient.write(serialToEthBuf, serialToEthIdx);
+		Serial2.write(serialToEthBuf, serialToEthIdx); // AAATEST
+
+		//tcpClient.write(termination);
+		serialToEthIdx = 0; // reset index.
+#endif
+	} // while (Serial2.available() > 0)
+#endif // AAATEST
 
 #if(0)
-		if(SERIALBT_TRANSPARENT_BRIDGE_FOR_SERIAL2){ // repeat
+		if(SERIALBT_TRANSPARENT_BRIDGE_FOR_SERIALZ){ // repeat
 
-			// serial comms between SerialBT and Serial2
+			// serial comms between SerialBT and SERIALZ
 			//if (SerialBT.available()) {
 			while (SerialBT.available()) { // possible infinite loop.
-				Serial2.write(SerialBT.read());
+				SERIALZ.write(SerialBT.read());
 			}
 
-			while (Serial2.available()) { // possible infinite loop.
-				SerialBT.write(Serial2.read());
+			while (SERIALZ.available()) { // possible infinite loop.
+				SerialBT.write(SERIALZ.read());
 			}
 		}
 #endif
 
 	}); // tail of taskManager.scheduleFixedRate ...
-#endif // NONWIFI_BUILD
-
+#endif // COMMS_BRIDGE
 
 
 #ifdef INIDEF_ETHERMEGA2560
@@ -1012,8 +1046,8 @@ void loop() {
 //	delay(10); // time allowance for background processing.
 
 #if(0)
-if(TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL2){
-	// serial comms for Serial2 via TCP
+if(TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIALV){
+
 	tcpServer.begin();
 
 	WiFiClient tcpClient = tcpServer.available();   // listen for incoming clients

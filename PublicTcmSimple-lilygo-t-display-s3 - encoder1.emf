@@ -203,7 +203,7 @@
     ],
     "lastThemeUuid": "e4524028-edd8-4e0a-ae15-a1f2ba05354f",
     "applicationUUID": "f1cdf4ed-8d8f-469e-b907-91c3e1536fab",
-    "applicationName": "PTcSim 250123 1547",
+    "applicationName": "PTcSim 250123 2030",
     "lastProperties": [
       {
         "name": "DISPLAY_VARIABLE",
@@ -332,7 +332,7 @@
       },
       {
         "name": "SERIAL_PORT",
-        "latestValue": "Serial2",
+        "latestValue": "myCom0com",
         "subsystem": "REMOTE"
       },
       {
