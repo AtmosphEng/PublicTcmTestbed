@@ -63,6 +63,7 @@ char pw[] = hotspot2_wifi_pw;
 #define TARGET_NUM_SERVER		1 // only if WIFI-AP
 #else
 #define TARGET_NUM_SERVER		17 // was 13
+//#define TARGET_NUM_SERVER		18 // was 13
 #endif
 
 //#define TARGET_NUM_AP 			TARGET_NUM_SERVER

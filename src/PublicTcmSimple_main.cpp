@@ -237,6 +237,7 @@ WiFiClient tcpClient;
 #define BAUD_SERIAL0 (115200)
 #define BAUD_SERIAL1 (115200)
 #define BAUD_SERIAL2 (115200)
+//#define BAUD_SERIAL2 (19200) // AAATEST NOK
 
 #define DEF_LED_DELAY 							500
 #define DEF_SERIAL_DELAY						100
@@ -566,7 +567,7 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 	IPAddress ip_static (INIDEF_WIFI_IP2);
 	WiFi.mode(WIFI_STA);
 	WiFi.config(ip_static, ip_gway, netmask);
-	WiFi.begin(ssid, pw);
+	WiFi.begin(ssid, pw); // AAATEST
 	delay(ALPHALIMA_DELAY_MS); // THIS DELAY IS VERY IMPORTANT : comment from AlphaLima www.LK8000.com ?
 	menuTcmMyIP.setIpAddress(((ip_static.toString()).c_str())); // convert to string then convert to const char*
 
@@ -845,8 +846,9 @@ if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIALV){ // initialise
 #ifdef COMMS_BRIDGE
 	// Simple way to keep XoverEmbedControl synced after schedule delay.
 	//taskManager.scheduleFixedRate(DEF_TCM_TASK_SCHEDULE_MS, [] { // ms. 
-	taskManager.scheduleFixedRate(1000, [] { // ms. AAATEST
-	//taskManager.scheduleFixedRate(500, [] { // ms.
+	//taskManager.scheduleFixedRate(1000, [] { // ms.
+	//taskManager.scheduleFixedRate(100, [] { // ms. AAATEST
+	taskManager.scheduleFixedRate(50, [] { // ms. AAATEST
 
 	//menuTcmTimeSec.setCurrentValue(menuTcmTimeSec.getCurrentValue() + 1); // Avoid using another variable.
 
