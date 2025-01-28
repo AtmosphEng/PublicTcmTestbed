@@ -180,17 +180,16 @@ HardwareRotaryEncoder* CCWRotaryEncoder3;
 
 Servo myServoValve; // create servo object to control a servo
 
-#ifdef NONWIFI_BUILD
+#ifdef WIFI_BUILD
 //#define BUF_SIZE 80
 #define BUF_SIZE 1024
-//size_t ethToSerialSize;
-static uint8_t ethToSerialBuf[BUF_SIZE];
+static uint8_t MY_STREAM_2_TO_MY_STREAM_1_Buf[BUF_SIZE];
     
 //size_t serialToEthSize;
-static uint8_t serialToEthBuf[BUF_SIZE];
+static uint8_t MY_STREAM_1_TO_MY_STREAM_2_Buf[BUF_SIZE];
 
-static uint16_t ethToSerialIdx = 0;
-static uint16_t serialToEthIdx = 0;
+static uint16_t MY_STREAM_1_TO_MY_STREAM_2_Idx = 0;
+static uint16_t MY_STREAM_2_TO_MY_STREAM_1_Idx = 0;
 //char termination = 0x02;
 //char termination = EOF;
 
@@ -395,7 +394,7 @@ void CALLBACK_FUNCTION onActivation(uint8_t pin, bool heldDown){ // tcMenu-switc
 	if(heldDown == true){ // i.e. 'pressed' i.e. one activation regardless of pressing time. works as logic toggle.
 		menuTcmCount1.setCurrentValue(menuTcmCount1.getCurrentValue() + 1); // increment value.
 		
-		menuTcmBaseCCW.setCurrentValue(100); // AAAFIXME reset incremental linear encoder to '0'.
+		menuTcmBaseCCW.setCurrentValue(100); // AAAMAGIC reset incremental linear encoder to '0'.
 		CCWRotaryEncoder3->setCurrentReading(100);
 		//delay(1000); 
 		//vTaskDelay(1000/portTICK_PERIOD_MS); // TaskDelay of x millisec. AAAMAGIC
@@ -588,7 +587,7 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 	menuTcmMyIP.setIpAddress(((ip_static.toString()).c_str())); // convert to string then convert to const char*
 #endif
 
-#ifdef NONWIFI_BUILD
+#ifdef WIFI_BUILD
 	menuTcmMyIP.setIpAddress(INIDEF_WIFI_IP2);
 	//esp_wifi_set_channel(WIFI_RADIO_CHANNEL, WIFI_SECOND_CHAN_NONE); // should be called after esp_wifi_start()
 #endif
@@ -609,7 +608,7 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 	switches.addSwitch(PIN_ENC2_B, onActivation, NO_REPEAT); // tcMenu-switches
 #endif
 
-#ifdef NONWIFI_BUILD
+#ifdef WIFI_BUILD
 	char ascii_id[DEF_DISPLAY_LINE_CHAR_COUNT]; // allocate null-terminated string storage for answer.
 	itoa(TARGET_NUM, ascii_id, DEF_NUMBER_BASE);
 	menuTcmTargetNum.setTextValue(ascii_id, false); // false means no callback.
@@ -737,7 +736,7 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 	switches.setEncoder(DEF_TCM_INDEX_ENCODER3, CCWRotaryEncoder3); // Do not relocate this line.
 #endif
 
-#ifdef NONWIFI_BUILD
+#ifdef WIFI_BUILD
 
 if(0) { // AAATEST
 //if(TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIALV){ // initialise
@@ -777,7 +776,7 @@ if(0) { // AAATEST
         MYDEBUGPRINT("tcpServer accepted a new client at: ");
         MYDEBUGPRINTLN(tcpClient.remoteIP());
         MYDEBUGPRINTLN(tcpClient.localIP());
-        tcpClient.println("tcpServer says hello to client!"); // this comes out on client USB / Serial OR Serial2?
+        //tcpClient.println("tcpServer says hello to client!"); // this comes out on client USB / Serial OR Serial2?
         alreadyConnected = true;
       }
 
@@ -786,7 +785,8 @@ if(0) { // AAATEST
   }
 } // TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIALV
 
-if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIALV){ // initialise
+if(1) { // AAATEST
+//if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIALV){ // initialise
 	IPAddress myServer(NET_ADDR_BYTE_1, NET_ADDR_BYTE_2, NET_ADDR_SUBNET_BYTE, TARGET_NUM_SERVER); 
 	
 #ifdef DEF_BYTE_BY_BYTE				
@@ -840,89 +840,56 @@ if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIALV){ // initialise
 
 } // TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIALV
 
-#endif // NONWIFI_BUILD
+#endif // WIFI_BUILD
+
+#define MY_STREAM_1 myCom0com // NOTE: myCom0com needs alternative_ prefixes to available, read, and write methods.
+#define MY_STREAM_2 tcpClient
 
 #define COMMS_BRIDGE
 #ifdef COMMS_BRIDGE
-	// Simple way to keep XoverEmbedControl synced after schedule delay.
-	//taskManager.scheduleFixedRate(DEF_TCM_TASK_SCHEDULE_MS, [] { // ms. 
 	//taskManager.scheduleFixedRate(1000, [] { // ms.
-	//taskManager.scheduleFixedRate(100, [] { // ms. AAATEST
 	taskManager.scheduleFixedRate(50, [] { // ms. AAATEST
-
 	//menuTcmTimeSec.setCurrentValue(menuTcmTimeSec.getCurrentValue() + 1); // Avoid using another variable.
 
 #if(1) // AAATEST
-	// WIFI READING then SERIAL WRITING ***********************************************************
-	//if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIALV){
-
-	//while (tcpClient.available() > 0) { // possibly infinite loop
-	//if (1) { // AAATEST
-	//if (myCom0com.available() > 0) { // AAATEST
-	//Serial2.println(myCom0com.available()); // AAATEST
-	//while (myCom0com.available() > 0) { // possibly infinite loop AAATEST
-	while (myCom0com.availableFIFOTx() > 0) { // possibly infinite loop AAATEST
-	//while (Serial2.available() > 0) { // possibly infinite loop AAATEST ******************* AAAFIXME
+	// FROM MY_STREAM_1 TO MY_STREAM_2 ***********************************************************
+	while (MY_STREAM_1.alternative_available() > 0) { // possibly infinite loop AAATEST
 
 #ifdef DEF_BYTE_BY_BYTE
-		//char c = tcpClient.read();
-		//SerialS.write(c);
-		char c = myCom0com.writeDequeue_IE_READ();
-		//char c = 'X';
-		if(c != 0) // if not NUL
-			Serial2.write(c); // AAATEST
+		char inChar = MY_STREAM_1.alternative_read();
+		MY_STREAM_2.write(inChar);
 #else
-		//ethToSerialIdx = tcpClient.readBytesUntil(termination, ethToSerialBuf, (BUF_SIZE - 1) );
-
-		//ethToSerialBuf[ethToSerialIdx] = tcpClient.read();
-		ethToSerialBuf[ethToSerialIdx] = myCom0com.writeDequeue_IE_READ();; // AAATEST
-		//Serial2.write(ethToSerialBuf[ethToSerialIdx]); // AAATEST
-
-		if (ethToSerialIdx < (BUF_SIZE - 1) ) {
-			ethToSerialIdx++;
+		MY_STREAM_1_TO_MY_STREAM_2_Buf[MY_STREAM_1_TO_MY_STREAM_2_Idx] = MY_STREAM_1.alternative_read();
+		if (MY_STREAM_1_TO_MY_STREAM_2_Idx < (BUF_SIZE - 1)) {
+			MY_STREAM_1_TO_MY_STREAM_2_Idx++;
 		}
 		else
 			break;
-
-		//Serial2.write(ethToSerialBuf, ethToSerialIdx);
-		//SerialS.write(ethToSerialBuf, ethToSerialIdx);
-		//myCom0com.write(termination);
-		//ethToSerialIdx = 0; // reset.
 #endif
-	} // while (tcpClient.available() > 0)
-	Serial2.write(ethToSerialBuf, ethToSerialIdx);
-	ethToSerialIdx = 0; // reset for next time.
+	} // while internal reading
+		MY_STREAM_2.write(MY_STREAM_1_TO_MY_STREAM_2_Buf, MY_STREAM_1_TO_MY_STREAM_2_Idx); // AAATEST external writing
+		MY_STREAM_1_TO_MY_STREAM_2_Idx = 0; // reset index for next time.
 #endif // AAATEST
 
-
 #if(1) // AAATEST
-	// SERIAL READING then WIFI WRITING ***********************************************************
-	//if (SerialS.available() > 0) {
-	while (Serial2.available() > 0) { // possibly infinite loop
+	// FROM MY_STREAM_2 TO MY_STREAM_1 ***********************************************************
+
+	while (MY_STREAM_2.available() > 0) { // possibly infinite loop
 
 #ifdef DEF_BYTE_BY_BYTE
-		//char inChar = SerialS.read();
-		//tcpClient.write(inChar);
-		char inChar = Serial2.read();
-		myCom0com.readEnqueue_IE_WRITE(inChar);
+		char c = MY_STREAM_2.read();
+		MY_STREAM_1.alternative_write(c); // AAATEST
 #else
-		//serialToEthIdx = myCom0com.readBytesUntil(termination, serialToEthBuf, (BUF_SIZE - 1));
-		serialToEthBuf[serialToEthIdx] = Serial2.read();
-		if (serialToEthIdx < (BUF_SIZE - 1)) {
-			serialToEthIdx++;
+		MY_STREAM_2_TO_MY_STREAM_1_Buf[MY_STREAM_1_TO_MY_STREAM_2_Idx] = MY_STREAM_2.read();
+		if (MY_STREAM_1_TO_MY_STREAM_2_Idx < (BUF_SIZE - 1) ) {
+			MY_STREAM_1_TO_MY_STREAM_2_Idx++;
 		}
 		else
 			break;
-
-		//tcpClient.write(serialToEthBuf, serialToEthIdx);
-		//Serial2.write(serialToEthBuf, serialToEthIdx); // AAATEST
-
-		//tcpClient.write(termination);
-		//serialToEthIdx = 0; // reset index.
 #endif
-	} // while (Serial2.available() > 0)
-		myCom0com.readBytesEnqueue_IE_WRITE(serialToEthBuf, serialToEthIdx); // AAATEST
-		serialToEthIdx = 0; // reset index.
+	} // while external reading
+	MY_STREAM_1.alternative_write(MY_STREAM_2_TO_MY_STREAM_1_Buf, MY_STREAM_1_TO_MY_STREAM_2_Idx); // internal writing
+	MY_STREAM_1_TO_MY_STREAM_2_Idx = 0; // reset index for next time.
 #endif // AAATEST
 
 
