@@ -562,8 +562,8 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 #define ALPHALIMA_DELAY_MS 2000
 
 #ifdef DEF_WIFI_STA
-	IPAddress ip_gway (INIDEF_WIFI_GWAY);
-	IPAddress ip_static (INIDEF_WIFI_IP2);
+	IPAddress ip_gway (DEF_WIFI_GWAY);
+	IPAddress ip_static (DEF_WIFI_IP);
 	WiFi.mode(WIFI_STA);
 	WiFi.config(ip_static, ip_gway, netmask);
 	WiFi.begin(ssid, pw); // AAATEST
@@ -578,8 +578,8 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 #endif
 
 #ifdef DEF_WIFI_AP // ESP32 WIFI ACCESS POINT
-	IPAddress ip_gway (INIDEF_WIFI_GWAY);
-	IPAddress ip_static (INIDEF_WIFI_IP2);
+	IPAddress ip_gway (DEF_WIFI_GWAY);
+	IPAddress ip_static (DEF_WIFI_IP);
 	WiFi.mode(WIFI_AP);
 	WiFi.softAP(ssid, pw); // configure ssid and password for softAP
 	delay(ALPHALIMA_DELAY_MS); // THIS DELAY IS VERY IMPORTANT : comment from AlphaLima www.LK8000.com ?
@@ -588,7 +588,7 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 #endif
 
 #ifdef WIFI_BUILD
-	menuTcmMyIP.setIpAddress(INIDEF_WIFI_IP2);
+	menuTcmMyIP.setIpAddress(DEF_WIFI_IP);
 	//esp_wifi_set_channel(WIFI_RADIO_CHANNEL, WIFI_SECOND_CHAN_NONE); // should be called after esp_wifi_start()
 #endif
 
@@ -736,10 +736,8 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 	switches.setEncoder(DEF_TCM_INDEX_ENCODER3, CCWRotaryEncoder3); // Do not relocate this line.
 #endif
 
-#ifdef WIFI_BUILD
 
-if(0) { // AAATEST
-//if(TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIALV){ // initialise
+#ifdef TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL
   // start listening for clients
   tcpServer.begin();
 #ifdef DEF_BYTE_BY_BYTE				
@@ -783,10 +781,10 @@ if(0) { // AAATEST
     }
 
   }
-} // TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIALV
+#endif // TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL
 
-if(1) { // AAATEST
-//if(TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIALV){ // initialise
+
+#ifdef TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL
 	IPAddress myServer(NET_ADDR_BYTE_1, NET_ADDR_BYTE_2, NET_ADDR_SUBNET_BYTE, TARGET_NUM_SERVER); 
 	
 #ifdef DEF_BYTE_BY_BYTE				
@@ -838,9 +836,8 @@ if(1) { // AAATEST
   MYDEBUGPRINTLN("closing connection?");
 #endif
 
-} // TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIALV
+#endif // TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIALV
 
-#endif // WIFI_BUILD
 
 #define MY_STREAM_1 myCom0com // NOTE: myCom0com needs alternative_ prefixes to available, read, and write methods.
 #define MY_STREAM_2 tcpClient
