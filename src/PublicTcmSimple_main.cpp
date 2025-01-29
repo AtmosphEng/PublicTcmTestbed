@@ -183,13 +183,13 @@ Servo myServoValve; // create servo object to control a servo
 #ifdef WIFI_BUILD
 //#define BUF_SIZE 80
 #define BUF_SIZE 1024
-static uint8_t MY_STREAM_2_TO_MY_STREAM_1_Buf[BUF_SIZE];
+static uint8_t STREAM_2_TO_STREAM_1_Buf[BUF_SIZE];
     
 //size_t serialToEthSize;
-static uint8_t MY_STREAM_1_TO_MY_STREAM_2_Buf[BUF_SIZE];
+static uint8_t STREAM_1_TO_STREAM_2_Buf[BUF_SIZE];
 
-static uint16_t MY_STREAM_1_TO_MY_STREAM_2_Idx = 0;
-static uint16_t MY_STREAM_2_TO_MY_STREAM_1_Idx = 0;
+static uint16_t STREAM_1_TO_STREAM_2_Idx = 0;
+static uint16_t STREAM_2_TO_STREAM_1_Idx = 0;
 //char termination = 0x02;
 //char termination = EOF;
 
@@ -838,55 +838,78 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 
 #endif // TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIALV
 
+#ifdef STREAM_1_VIRT
+#define STREAM_1_AVAILABLE STREAM_1.alternative_available
+#define STREAM_1_READ STREAM_1.alternative_read
+#define STREAM_1_WRITE STREAM_1.alternative_write
+#else
+#define STREAM_1_AVAILABLE STREAM_1.available
+#define STREAM_1_READ STREAM_1.read
+#define STREAM_1_WRITE STREAM_1.write
+#endif
 
-#define MY_STREAM_1 myCom0com // NOTE: myCom0com needs alternative_ prefixes to available, read, and write methods.
-#define MY_STREAM_2 tcpClient
+#ifdef STREAM_2_VIRT
+#define STREAM_2_AVAILABLE STREAM_2.alternative_available
+#define STREAM_2_READ STREAM_2.alternative_read
+#define STREAM_2_WRITE STREAM_2.alternative_write
+#else
+#define STREAM_2_AVAILABLE STREAM_2.available
+#define STREAM_2_READ STREAM_2.read
+#define STREAM_2_WRITE STREAM_2.write
+#endif
 
-#define COMMS_BRIDGE
-#ifdef COMMS_BRIDGE
+#ifdef STREAM_1_STREAM_2_BRIDGE
 	//taskManager.scheduleFixedRate(1000, [] { // ms.
 	taskManager.scheduleFixedRate(50, [] { // ms. AAATEST
 	//menuTcmTimeSec.setCurrentValue(menuTcmTimeSec.getCurrentValue() + 1); // Avoid using another variable.
 
 #if(1) // AAATEST
-	// FROM MY_STREAM_1 TO MY_STREAM_2 ***********************************************************
-	while (MY_STREAM_1.alternative_available() > 0) { // possibly infinite loop AAATEST
+	// FROM STREAM_1 TO STREAM_2 ***********************************************************
+	//while (STREAM_1.alternative_available() > 0) { // could add timeout.
+	while (STREAM_1_AVAILABLE() > 0) { // possibly infinite loop AAATEST
 
 #ifdef DEF_BYTE_BY_BYTE
-		char inChar = MY_STREAM_1.alternative_read();
-		MY_STREAM_2.write(inChar);
+		//char inChar = STREAM_1.alternative_read();
+		char inChar = STREAM_1_READ;
+		//STREAM_2.write(inChar);
+		STREAM_2_WRITE(inChar);
 #else
-		MY_STREAM_1_TO_MY_STREAM_2_Buf[MY_STREAM_1_TO_MY_STREAM_2_Idx] = MY_STREAM_1.alternative_read();
-		if (MY_STREAM_1_TO_MY_STREAM_2_Idx < (BUF_SIZE - 1)) {
-			MY_STREAM_1_TO_MY_STREAM_2_Idx++;
+		STREAM_1_TO_STREAM_2_Buf[STREAM_1_TO_STREAM_2_Idx] = STREAM_1_READ();
+		if (STREAM_1_TO_STREAM_2_Idx < (BUF_SIZE - 1)) {
+			STREAM_1_TO_STREAM_2_Idx++;
 		}
 		else
 			break;
 #endif
 	} // while internal reading
-		MY_STREAM_2.write(MY_STREAM_1_TO_MY_STREAM_2_Buf, MY_STREAM_1_TO_MY_STREAM_2_Idx); // AAATEST external writing
-		MY_STREAM_1_TO_MY_STREAM_2_Idx = 0; // reset index for next time.
+		//Stream2.write(STREAM_1_TO_STREAM_2_Buf, STREAM_1_TO_STREAM_2_Idx); // AAATEST external writing
+		STREAM_2_WRITE(STREAM_1_TO_STREAM_2_Buf, STREAM_1_TO_STREAM_2_Idx); // AAATEST external writing
+		STREAM_1_TO_STREAM_2_Idx = 0; // reset index for next time.
 #endif // AAATEST
 
 #if(1) // AAATEST
-	// FROM MY_STREAM_2 TO MY_STREAM_1 ***********************************************************
-
-	while (MY_STREAM_2.available() > 0) { // possibly infinite loop
+	// FROM STREAM_2 TO STREAM_1 ***********************************************************
+	//while (STREAM_2.available() > 0) { // could add timeout.
+	while (STREAM_2_AVAILABLE() > 0) { // could add timeout.
 
 #ifdef DEF_BYTE_BY_BYTE
-		char c = MY_STREAM_2.read();
-		MY_STREAM_1.alternative_write(c); // AAATEST
+		//char c = STREAM_2.read();
+		char c = STREAM_2_READ();
+		//STREAM_1.alternative_write(c); // AAATEST
+		STREAM_1_WRITE(c); // AAATEST
 #else
-		MY_STREAM_2_TO_MY_STREAM_1_Buf[MY_STREAM_1_TO_MY_STREAM_2_Idx] = MY_STREAM_2.read();
-		if (MY_STREAM_1_TO_MY_STREAM_2_Idx < (BUF_SIZE - 1) ) {
-			MY_STREAM_1_TO_MY_STREAM_2_Idx++;
+		//STREAM_2_TO_STREAM_1_Buf[STREAM_1_TO_STREAM_2_Idx] = STREAM_2.read();
+		STREAM_2_TO_STREAM_1_Buf[STREAM_1_TO_STREAM_2_Idx] = STREAM_2_READ();
+		if (STREAM_1_TO_STREAM_2_Idx < (BUF_SIZE - 1) ) {
+			STREAM_1_TO_STREAM_2_Idx++;
 		}
 		else
 			break;
 #endif
 	} // while external reading
-	MY_STREAM_1.alternative_write(MY_STREAM_2_TO_MY_STREAM_1_Buf, MY_STREAM_1_TO_MY_STREAM_2_Idx); // internal writing
-	MY_STREAM_1_TO_MY_STREAM_2_Idx = 0; // reset index for next time.
+	//STREAM_1.alternative_write(STREAM_2_TO_STREAM_1_Buf, STREAM_1_TO_STREAM_2_Idx); // internal writing
+	STREAM_1_WRITE(STREAM_2_TO_STREAM_1_Buf, STREAM_1_TO_STREAM_2_Idx); // internal writing
+	STREAM_1_TO_STREAM_2_Idx = 0; // reset index for next time.
 #endif // AAATEST
 
 

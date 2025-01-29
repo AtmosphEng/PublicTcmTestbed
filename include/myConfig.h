@@ -18,12 +18,18 @@ const bool SERIALBT_TRANSPARENT_BRIDGE_FOR_SERIALZ = false;
 
 #define WIFI_BUILD
 
+#define STREAM_1 myCom0com // NOTE: myCom0com needs alternative_ prefixes to available, read, and write methods.
+#define STREAM_2 tcpClient
+#define STREAM_1_VIRT
+//#define STREAM_2_VIRT
+#define STREAM_1_STREAM_2_BRIDGE
+
 //#define DEF_BYTE_BY_BYTE // else its buffered
 //#define DEF_SERVER_PORT 80
 #define DEF_SERVER_PORT 3333 // for tcMenu embedControl tcpip
 
 // ENABLE THE FOLLOWING AS REQUIRED: **************************************************************
-#if(1)
+#if(0)
 #define TCP_SERVER_BUILD
 #define DEF_WIFI_AP
 //#define DEF_WIFI_STA
