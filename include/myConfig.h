@@ -4,6 +4,9 @@
 #ifndef MY_CONFIG_H
 #define MY_CONFIG_H
 
+#include "../../libraries/VirtSerial/src/VirtSerial.h"
+VirtSerial myCom0com; // my class object.
+
 #define DEF_TCM_OPERATIONAL // for pin_config file(s)
 
 // EXTRA ENCODER(S)
@@ -18,10 +21,14 @@ const bool SERIALBT_TRANSPARENT_BRIDGE_FOR_SERIALZ = false;
 
 #define WIFI_BUILD
 
-#define STREAM_1 myCom0com // NOTE: myCom0com needs alternative_ prefixes to available, read, and write methods.
+// ENABLE THE FOLLOWING AS REQUIRED: **************************************************************
+#define STREAM_1 Serial2
+//#define STREAM_1 myCom0com
+//#define STREAM_1_VIRT
+
 #define STREAM_2 tcpClient
-#define STREAM_1_VIRT
 //#define STREAM_2_VIRT
+
 #define STREAM_1_STREAM_2_BRIDGE
 
 //#define DEF_BYTE_BY_BYTE // else its buffered
@@ -29,14 +36,14 @@ const bool SERIALBT_TRANSPARENT_BRIDGE_FOR_SERIALZ = false;
 #define DEF_SERVER_PORT 3333 // for tcMenu embedControl tcpip
 
 // ENABLE THE FOLLOWING AS REQUIRED: **************************************************************
-#if(0)
+// ENABLE THE FOLLOWING AS REQUIRED: **************************************************************
+#if(1)
 #define TCP_SERVER_BUILD
 #define DEF_WIFI_AP
 //#define DEF_WIFI_STA
 #define TARGET_NUM_SERVER		1 //
 //#define TARGET_NUM_SERVER		17 // was 13. only if NOT using DEF_WIFI_AP
 WiFiServer tcpServer(DEF_SERVER_PORT);
-
 #else
 #define TCP_CLIENT_BUILD
 #define TARGET_NUM_CLIENT		14

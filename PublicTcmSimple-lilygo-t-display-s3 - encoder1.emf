@@ -192,6 +192,23 @@
         "visible": true,
         "staticDataInRAM": false
       }
+    },
+    {
+      "parentId": 0,
+      "type": "textItem",
+      "defaultValue": "",
+      "item": {
+        "textLength": 20,
+        "itemType": "PLAIN_TEXT",
+        "name": "MAC",
+        "variableName": "TcmMAC",
+        "id": 11,
+        "eepromAddress": -1,
+        "readOnly": true,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
     }
   ],
   "codeOptions": {
@@ -203,7 +220,7 @@
     ],
     "lastThemeUuid": "e4524028-edd8-4e0a-ae15-a1f2ba05354f",
     "applicationUUID": "f1cdf4ed-8d8f-469e-b907-91c3e1536fab",
-    "applicationName": "PTcSim 250123 2030",
+    "applicationName": "PTcSim 250130 1406",
     "lastProperties": [
       {
         "name": "DISPLAY_VARIABLE",

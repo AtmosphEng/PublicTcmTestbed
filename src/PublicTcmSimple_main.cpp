@@ -76,10 +76,6 @@
 #include <SPI.h>
 #include <SwitchInput.h> // tcMenu-switches
 
-#include "../../libraries/VirtSerial/src/VirtSerial.h"
-
-VirtSerial myCom0com(1); // my class object. Virtual serial port needs no initialiser so use arbitrary number ?
-
 
 #ifndef ARDUINO_ARCH_AVR
 #include <esp_wifi.h> // for esp_read_mac() etc.
@@ -185,13 +181,6 @@ Servo myServoValve; // create servo object to control a servo
 #define BUF_SIZE 1024
 static uint8_t STREAM_2_TO_STREAM_1_Buf[BUF_SIZE];
     
-//size_t serialToEthSize;
-static uint8_t STREAM_1_TO_STREAM_2_Buf[BUF_SIZE];
-
-static uint16_t STREAM_1_TO_STREAM_2_Idx = 0;
-static uint16_t STREAM_2_TO_STREAM_1_Idx = 0;
-//char termination = 0x02;
-//char termination = EOF;
 
 WiFiClient tcpClient;
 #endif
@@ -570,11 +559,6 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 	delay(ALPHALIMA_DELAY_MS); // THIS DELAY IS VERY IMPORTANT : comment from AlphaLima www.LK8000.com ?
 	menuTcmMyIP.setIpAddress(((ip_static.toString()).c_str())); // convert to string then convert to const char*
 
-#if(0)
-	Serial.print("ESP Board MAC Address:  "); // 2024-04-05 testing for wifi on t-display-s3
-  Serial.println(WiFi.macAddress());
-#endif
-
 #endif
 
 #ifdef DEF_WIFI_AP // ESP32 WIFI ACCESS POINT
@@ -590,6 +574,12 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 #ifdef WIFI_BUILD
 	menuTcmMyIP.setIpAddress(DEF_WIFI_IP);
 	//esp_wifi_set_channel(WIFI_RADIO_CHANNEL, WIFI_SECOND_CHAN_NONE); // should be called after esp_wifi_start()
+#endif
+
+#if(1)
+	MYDEBUGPRINT("ESP Board MAC Address:  "); // 2024-04-05 testing for wifi on t-display-s3
+	MYDEBUGPRINTLN(WiFi.macAddress());
+	menuTcmMAC.setTextValue(((WiFi.macAddress()).c_str())); // convert to string then convert to const char*
 #endif
 
 #ifdef INIDEF_LILYGO_T_DISPLAY_S3
@@ -736,6 +726,15 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 	switches.setEncoder(DEF_TCM_INDEX_ENCODER3, CCWRotaryEncoder3); // Do not relocate this line.
 #endif
 
+#if(1) // AAATEST
+
+//size_t serialToEthSize;
+static uint8_t STREAM_1_TO_STREAM_2_Buf[BUF_SIZE];
+
+static uint16_t STREAM_1_TO_STREAM_2_Idx = 0;
+static uint16_t STREAM_2_TO_STREAM_1_Idx = 0;
+//char termination = 0x02;
+//char termination = EOF;
 
 #ifdef TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL
   // start listening for clients
@@ -930,6 +929,8 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 
 	}); // tail of taskManager.scheduleFixedRate ...
 #endif // COMMS_BRIDGE
+
+#endif // AAATEST
 
 
 #ifdef INIDEF_ETHERMEGA2560
