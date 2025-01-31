@@ -737,9 +737,6 @@ static uint16_t STREAM_2_TO_STREAM_1_Idx = 0;
 //char termination = EOF;
 
 #ifdef TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL
-
-	menuTcmConnType.setCurrentValue(1); // AAAMAGIC enum tcpServer
-
   // start listening for clients
   tcpServer.begin();
 #ifdef DEF_BYTE_BY_BYTE				
@@ -788,7 +785,7 @@ static uint16_t STREAM_2_TO_STREAM_1_Idx = 0;
 
 #ifdef TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL
 
-	menuTcmConnType.setCurrentValue(2); // AAAMAGIC enum tcpClient
+	menuTcmConnType.
 	IPAddress myServer(NET_ADDR_BYTE_1, NET_ADDR_BYTE_2, NET_ADDR_SUBNET_BYTE, TARGET_NUM_SERVER); 
 	
 #ifdef DEF_BYTE_BY_BYTE				

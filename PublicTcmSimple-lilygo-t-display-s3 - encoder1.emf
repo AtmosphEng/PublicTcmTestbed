@@ -1,6 +1,6 @@
 {
   "version": "1.00",
-  "projectName": "embedCONTROL :  Serial2",
+  "projectName": "embedCONTROL :  none",
   "author": "localuser",
   "items": [
     {
@@ -209,6 +209,26 @@
         "visible": true,
         "staticDataInRAM": false
       }
+    },
+    {
+      "parentId": 0,
+      "type": "enumItem",
+      "defaultValue": "0",
+      "item": {
+        "enumEntries": [
+          "NONE",
+          "tcpServer",
+          "tcpClient"
+        ],
+        "name": "ConnType",
+        "variableName": "TcmConnType",
+        "id": 12,
+        "eepromAddress": -1,
+        "readOnly": true,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
     }
   ],
   "codeOptions": {
@@ -216,11 +236,11 @@
     "lastDisplayUuid": "e6342680-6fab-4d1b-ac08-ce8dbfc0974c",
     "lastInputUuid": "6dd87e7d-e751-4912-a70d-91793b1d3d87",
     "lastRemoteUuids": [
-      "ba23b2a7-040e-40e2-8fae-d45c82cf450b"
+      "2c101fec-1f7d-4ff3-8d2b-992ad41e7fcb"
     ],
     "lastThemeUuid": "e4524028-edd8-4e0a-ae15-a1f2ba05354f",
     "applicationUUID": "f1cdf4ed-8d8f-469e-b907-91c3e1536fab",
-    "applicationName": "PTcSim 250130 1406",
+    "applicationName": "PTcSim 250131 2009",
     "lastProperties": [
       {
         "name": "DISPLAY_VARIABLE",
@@ -346,16 +366,6 @@
         "name": "ENCODER_IS_QUARTER_CYCLE",
         "latestValue": "false",
         "subsystem": "INPUT"
-      },
-      {
-        "name": "SERIAL_PORT",
-        "latestValue": "myCom0com",
-        "subsystem": "REMOTE"
-      },
-      {
-        "name": "HARDWARE_PORT",
-        "latestValue": "true",
-        "subsystem": "REMOTE"
       },
       {
         "name": "ITEM_FONT",

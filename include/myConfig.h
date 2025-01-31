@@ -4,8 +4,6 @@
 #ifndef MY_CONFIG_H
 #define MY_CONFIG_H
 
-#include "../../libraries/VirtSerial/src/VirtSerial.h"
-VirtSerial myCom0com; // my class object.
 
 #define DEF_TCM_OPERATIONAL // for pin_config file(s)
 
@@ -22,13 +20,17 @@ const bool SERIALBT_TRANSPARENT_BRIDGE_FOR_SERIALZ = false;
 #define WIFI_BUILD
 
 // ENABLE THE FOLLOWING AS REQUIRED: **************************************************************
+// ENABLE THE FOLLOWING AS REQUIRED: **************************************************************
+#if(0)
+#include "../../libraries/VirtSerial/src/VirtSerial.h"
+VirtSerial myCom0com; // my class object.
+#define STREAM_1 myCom0com
+#define STREAM_1_VIRT
+#else
 #define STREAM_1 Serial2
-//#define STREAM_1 myCom0com
-//#define STREAM_1_VIRT
-
+#endif
 #define STREAM_2 tcpClient
 //#define STREAM_2_VIRT
-
 #define STREAM_1_STREAM_2_BRIDGE
 
 //#define DEF_BYTE_BY_BYTE // else its buffered
@@ -52,6 +54,7 @@ WiFiServer tcpServer(DEF_SERVER_PORT);
 
 #ifdef WIFI_BUILD
 
+// ENABLE ONE OR NONE OF THE FOLLOWING: ***********************************************************
 // ENABLE ONE OR NONE OF THE FOLLOWING: ***********************************************************
 #define NETWORK_AP1
 //#define NETWORK_NETCOMM
