@@ -1,4 +1,4 @@
-#include "generated/PublicTcmSimple_menu.h"
+//#include "generated/PublicTcmSimple_menu.h"
 /*
 // DESCRIPTION ********************************************************************************************************
 //
@@ -72,6 +72,7 @@
 // DESCRIPTION ********************************************************************************************************
 */
 
+#include "src_menu.h" // for tcMenu
 #include <Arduino.h>
 #include <SPI.h>
 #include <SwitchInput.h> // tcMenu-switches
@@ -99,9 +100,39 @@ BluetoothSerial SerialBT;
 #include "..\..\Credentials\Credentials.h"
 #endif
 
-#include "myDebugPrint.h"
-#include "myConfig.h"
-#include "src_menu.h" // for tcMenu
+#include <WiFi.h>
+
+//enum class WifiMode {off, sta, ap, multi};
+//enum class ConnType {server, client};
+//WifiMode myWifiMode;
+//ConnType myConnType;
+
+
+//#include "myConfig.h"
+
+//#ifdef WIFI_BUILD
+#include "../../libraries/CommsHelper/src/commsHelper.h"
+CommsHelper	myCommsHelper;
+
+
+#include "configNetwork.h"
+//#endif
+
+#if(0)
+#define MYSERIALX Serial
+#else
+#define MYSERIALX Serial1
+//#define MYSERIALX Serial2
+#endif
+#include "../../libraries/MyDebug/src/myDebugPrint.h"
+
+#define BAUD_SERIAL  (115200)
+#define BAUD_SERIAL0 (115200)
+#define BAUD_SERIAL1 (115200)
+#define BAUD_SERIAL2 (115200)
+
+#define DEF_LED_DELAY 		500
+#define DEF_SERIAL_DELAY	100
 
 
 #ifdef ARDUINO_ARCH_AVR
@@ -158,20 +189,17 @@ APA102<PIN_APA102_DI, PIN_APA102_CLK> ledStrip; // t-embed builtin RGB_LED
 #include "pin_config-t7-s3-esp32-s3.h"
 #endif
 
-#ifdef CONF_EXTRA_ENC2_TCW
+#ifdef CONF_EXTRA_ENCODER2
 HardwareRotaryEncoder* TCWRotaryEncoder2;
 #define DEF_TCM_TCW_ENCODER2 menuTcmBaseTCW // ASSIGN ENCODER2 TO ANALOGMENUITEM.
 #define DEF_TCM_INDEX_ENCODER2 1 // Note - 1st encoder is tcmenu indexed as 0.
 #endif
 
-#ifdef CONF_EXTRA_ENC3_CCW
+#ifdef CONF_EXTRA_ENCODER3
 HardwareRotaryEncoder* CCWRotaryEncoder3;
-#define DEF_TCM_CCW_ENCODER3 menuTcmBaseCCW // ASSIGN ENCODER3 TO ANALOGMENUITEM.
+#define DEF_TCM_CCW_ENCODER3 menuTcmLinearEncFine // ASSIGN ENCODER3 TO ANALOGMENUITEM.
 #define DEF_TCM_INDEX_ENCODER3 2 // Note - 1st encoder is tcmenu indexed as 0.
 #endif
-
-
-#define MYSERIALX Serial
 
 
 Servo myServoValve; // create servo object to control a servo
@@ -182,7 +210,7 @@ Servo myServoValve; // create servo object to control a servo
 static uint8_t STREAM_2_TO_STREAM_1_Buf[BUF_SIZE];
     
 
-WiFiClient tcpClient;
+//WiFiClient tcpClient;
 #endif
 
 #ifdef INIDEF_ARDUINOOTA
@@ -221,14 +249,6 @@ WiFiClient tcpClient;
 //#define PIN_ENCODER0_DAT_A15	A15 // Assigned in tcmenu Designer Code Generator.
 #endif														// ARDUINO_ARCH_AVR
 
-#define BAUD_SERIAL  (115200)
-#define BAUD_SERIAL0 (115200)
-#define BAUD_SERIAL1 (115200)
-#define BAUD_SERIAL2 (115200)
-//#define BAUD_SERIAL2 (19200) // AAATEST NOK
-
-#define DEF_LED_DELAY 							500
-#define DEF_SERIAL_DELAY						100
 #define DEF_BTSERIAL_DELAY_MS				10000
 
 #define DEF_TCM_TASK_SCHEDULE_MS		1000
@@ -241,11 +261,11 @@ int myCount2 = 0;
 // *** FUNCTION(S) **********************************************
 void refreshMenu(void) {
 
-	menuTcmCount1.setSendRemoteNeededAll();
-	menuTcmCount2.setSendRemoteNeededAll();
-	menuTcmBaseTCW.setSendRemoteNeededAll();
-	menuTcmBaseCCW.setSendRemoteNeededAll();
-	menuTcmDebugLED.setSendRemoteNeededAll();
+	//menuTcmCount1.setSendRemoteNeededAll();
+	//menuTcmCount2.setSendRemoteNeededAll();
+	//menuTcmBaseTCW.setSendRemoteNeededAll();
+	//menuTcmBaseCCW.setSendRemoteNeededAll();
+	//menuTcmDebugLED.setSendRemoteNeededAll();
 }
 
 #ifdef INIDEF_LILYGO_T_EMBED_S3
@@ -377,14 +397,16 @@ void WiFiEvent(WiFiEvent_t event)
 #endif
 
 
-#ifdef MY_TCMENU_SWITCH
+#ifdef DEF_TCM_OPERATIONAL
+//#ifdef MY_TCMENU_SWITCH_ONBOARD_LINEAR_ENCODER
 void CALLBACK_FUNCTION onActivation(uint8_t pin, bool heldDown){ // tcMenu-switches - if heldDown false, then action
 	//if(heldDown == false){ // i.e. 'pressed' i.e. one activation regardless of pressing time. works as logic toggle.
 	if(heldDown == true){ // i.e. 'pressed' i.e. one activation regardless of pressing time. works as logic toggle.
-		menuTcmCount1.setCurrentValue(menuTcmCount1.getCurrentValue() + 1); // increment value.
+		menuTcmLinearEncLaps.setCurrentValue(menuTcmLinearEncLaps.getCurrentValue() + 1); // increment value onboard linear encoder
 		
-		menuTcmBaseCCW.setCurrentValue(100); // AAAMAGIC reset incremental linear encoder to '0'.
-		CCWRotaryEncoder3->setCurrentReading(100);
+		//menuTcmLinearEncFine.setCurrentValue(-2500); // AAAMAGIC reset incremental linear encoder to '0'.
+		menuTcmLinearEncFine.setCurrentValue(2500); // AAAMAGIC reset incremental linear encoder to '0'.
+		CCWRotaryEncoder3->setCurrentReading(2500); // AAAMAGIC reset incremental linear encoder to '0'.
 		//delay(1000); 
 		//vTaskDelay(1000/portTICK_PERIOD_MS); // TaskDelay of x millisec. AAAMAGIC
 	}
@@ -443,7 +465,7 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 #ifdef MYSERIAL2_BEGIN
 	MYSERIAL2_BEGIN;
 	delay(DEF_SERIAL_DELAY); // Need time here?
-#if(0)
+#if(1)
 	Serial2.println("Hello from Serial2");
 	Serial2.println("Hello from Serial2");
 	Serial2.println("Hello from Serial2");
@@ -548,39 +570,7 @@ delay(DEF_SERIAL_DELAY); // Need time here?
   digitalWrite(PIN_LCD_BL, HIGH);
 #endif
 
-#define ALPHALIMA_DELAY_MS 2000
-
-#ifdef DEF_WIFI_STA
-	IPAddress ip_gway (DEF_WIFI_GWAY);
-	IPAddress ip_static (DEF_WIFI_IP);
-	WiFi.mode(WIFI_STA);
-	WiFi.config(ip_static, ip_gway, netmask);
-	WiFi.begin(ssid, pw); // AAATEST
-	delay(ALPHALIMA_DELAY_MS); // THIS DELAY IS VERY IMPORTANT : comment from AlphaLima www.LK8000.com ?
-	menuTcmMyIP.setIpAddress(((ip_static.toString()).c_str())); // convert to string then convert to const char*
-
-#endif
-
-#ifdef DEF_WIFI_AP // ESP32 WIFI ACCESS POINT
-	IPAddress ip_gway (DEF_WIFI_GWAY);
-	IPAddress ip_static (DEF_WIFI_IP);
-	WiFi.mode(WIFI_AP);
-	WiFi.softAP(ssid, pw); // configure ssid and password for softAP
-	delay(ALPHALIMA_DELAY_MS); // THIS DELAY IS VERY IMPORTANT : comment from AlphaLima www.LK8000.com ?
-	WiFi.softAPConfig(ip_static, ip_gway, netmask); // IP_AP, IP_GATEWAY, MASK. configure ip address for softAP
-	menuTcmMyIP.setIpAddress(((ip_static.toString()).c_str())); // convert to string then convert to const char*
-#endif
-
-#ifdef WIFI_BUILD
-	menuTcmMyIP.setIpAddress(DEF_WIFI_IP);
-	//esp_wifi_set_channel(WIFI_RADIO_CHANNEL, WIFI_SECOND_CHAN_NONE); // should be called after esp_wifi_start()
-#endif
-
-#if(1)
-	MYDEBUGPRINT("ESP Board MAC Address:  "); // 2024-04-05 testing for wifi on t-display-s3
-	MYDEBUGPRINTLN(WiFi.macAddress());
-	menuTcmMAC.setTextValue(((WiFi.macAddress()).c_str())); // convert to string then convert to const char*
-#endif
+  myCommsHelper.configWifi();
 
 #ifdef INIDEF_LILYGO_T_DISPLAY_S3
 	pinMode(PIN_POWER_ON, OUTPUT);
@@ -593,9 +583,10 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 	setupMenu(); // for tcMenu ********************************************************************************
 
 
-#ifdef MY_TCMENU_SWITCH
+#ifdef DEF_TCM_OPERATIONAL
+//#ifdef MY_TCMENU_SWITCH_ONBOARD_LINEAR_ENCODER
  	switches.init(asIoRef(internalDigitalDevice()), SWITCHES_NO_POLLING, true); // use intr?(IOtype, read via, pull-up)
-	switches.addSwitch(PIN_ENC2_B, onActivation, NO_REPEAT); // tcMenu-switches
+	switches.addSwitch(PIN_ENC2_B, onActivation, NO_REPEAT); // tcMenu-switches NB tcMenu lib for ENC2 is NOT used here
 #endif
 
 #ifdef WIFI_BUILD
@@ -680,12 +671,14 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 	myCount1 = 1;
 	menuTcmCount1.setCurrentValue(myCount1);
 
-	taskManager.scheduleFixedRate(1000, [] {						// ms
-		myCount2 = (menuTcmCount1.getCurrentValue()) * 2; // Get a menu value and transform it.
-		menuTcmCount2.setCurrentValue(myCount2);
-	});
-
 #endif // defined(ARDUINO_ARCH_AVR) && !defined(INIDEF_UNO)
+
+#ifdef DEF_TCM_OPERATIONAL // do it on the client
+	taskManager.scheduleFixedRate(1000, [] {						// ms
+		menuTcmTimeSec.setCurrentValue(menuTcmTimeSec.getCurrentValue() + 1); // AAAMAGIC increment time.
+	});
+#endif // ifndef DEF_TCM_OPERATIONAL
+
 
 #if(0)
 #define DEF_TCM_SERIAL_XOVER_SYNC_ONCE
@@ -696,7 +689,7 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 #endif
 #endif
 
-#ifdef CONF_EXTRA_ENC2_TCW
+#ifdef CONF_EXTRA_ENCODER2
 	pinMode(PIN_ENC2_A, INPUT_PULLUP); // for CCWRotaryEncoder2
 	pinMode(PIN_ENC2_B, INPUT_PULLUP);
 	//pinMode(PIN_ENC2_OK, INPUT_PULLUP); // Not required.
@@ -712,7 +705,7 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 	switches.setEncoder(DEF_TCM_INDEX_ENCODER2, TCWRotaryEncoder2); // Do not relocate this line.
 #endif
 
-#ifdef CONF_EXTRA_ENC3_CCW
+#ifdef CONF_EXTRA_ENCODER3
 	pinMode(PIN_ENC3_A, INPUT_PULLUP); // for CCWRotaryEncoder2
 	pinMode(PIN_ENC3_B, INPUT_PULLUP);
 	//pinMode(PIN_ENC3_OK, INPUT_PULLUP); // Not required.
@@ -726,218 +719,6 @@ delay(DEF_SERIAL_DELAY); // Need time here?
 	switches.setEncoder(DEF_TCM_INDEX_ENCODER3, CCWRotaryEncoder3); // Do not relocate this line.
 #endif
 
-#if(1) // AAATEST
-
-//size_t serialToEthSize;
-static uint8_t STREAM_1_TO_STREAM_2_Buf[BUF_SIZE];
-
-static uint16_t STREAM_1_TO_STREAM_2_Idx = 0;
-static uint16_t STREAM_2_TO_STREAM_1_Idx = 0;
-//char termination = 0x02;
-//char termination = EOF;
-
-#ifdef TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL
-
-	menuTcmConnType.setCurrentValue(1); // AAAMAGIC enum tcpServer
-
-  // start listening for clients
-  tcpServer.begin();
-#ifdef DEF_BYTE_BY_BYTE				
-        MYDEBUGPRINTLN("tcpServer serial bridge transfer is byte-by-byte");
-#else
-        MYDEBUGPRINTLN("tcpServer serial bridge transfer is buffered");
-#endif				
-
-  MYDEBUGPRINT("tcpServer address: ");
-  MYDEBUGPRINTLN(WiFi.localIP());   //inform user about local IP address (STA class)
-  //MYDEBUGPRINTLN(WiFi.softAPIP());   //inform user about soft AP IP address
-
-#ifdef PIODEF_MEGA2560
-  MYDEBUGPRINTLN(Ethernet.localIP());
-#endif
-
-	tcpClient = tcpServer.available();   // listen for incoming clients
-	bool alreadyConnected = false; // whether or not the client was connected previously
-
-  while (!tcpClient) {
-    // wait for a new client:
-
-    //EthernetClient client = server.available();
-    tcpClient = tcpServer.available();
-
-    // when the client sends the first byte, say hello:
-
-    if (tcpClient) {
-
-      if (!alreadyConnected) {
-
-        // clear out the input buffer:
-        tcpClient.flush();
-        MYDEBUGPRINT("tcpServer accepted a new client at: ");
-        MYDEBUGPRINTLN(tcpClient.remoteIP());
-        MYDEBUGPRINTLN(tcpClient.localIP());
-        //tcpClient.println("tcpServer says hello to client!"); // this comes out on client USB / Serial OR Serial2?
-        alreadyConnected = true;
-      }
-
-    }
-
-  }
-#endif // TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIAL
-
-
-#ifdef TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIAL
-
-	menuTcmConnType.setCurrentValue(2); // AAAMAGIC enum tcpClient
-	IPAddress myServer(NET_ADDR_BYTE_1, NET_ADDR_BYTE_2, NET_ADDR_SUBNET_BYTE, TARGET_NUM_SERVER); 
-	
-#ifdef DEF_BYTE_BY_BYTE				
-  MYDEBUGPRINTLN("tcpClient serial bridge transfer is byte-by-byte");
-#else
-  MYDEBUGPRINTLN("tcpClient serial bridge transfer is buffered");
-#endif				
-
-  MYDEBUGPRINT("client address: ");
-  MYDEBUGPRINTLN(WiFi.localIP());   // inform user about local IP address
-	
-  MYDEBUGPRINT("client connecting to tcpServer at IP: ");
-  MYDEBUGPRINTLN(myServer);
-
-  // Use WiFiClient class to create TCP connections
-  //WiFiClient client;
-  const int httpPort = DEF_SERVER_PORT;
-  //if (!tcpClient.connect(INIDEF_WIFI_IP_SERVER, httpPort)) {
-  if (!tcpClient.connect(myServer, httpPort)) {
-    MYDEBUGPRINTLN("connection failed");
-    return;
-  }
-
-#if(0)
-  //MYDEBUGPRINT("Requesting URL: ");
-  //MYDEBUGPRINTLN(url);
-
-  // This will send the request to the server
-  tcpClient.print(String("GET ") + url + " HTTP/1.1\r\n" +
-               "Host: " + host + "\r\n" +
-               "Connection: close\r\n\r\n");
-#endif
-
-#if(0)
-  unsigned long timeout = millis();
-  while (tcpClient.available() == 0) {
-    if (millis() - timeout > 5000) {
-      MYDEBUGPRINTLN(">>> Client Timeout !");
-      tcpClient.stop();
-      return;
-    }
-  }
-
-  // Read all the lines of the reply from server and print them to Serial
-  while (tcpClient.available()) {
-    String line = tcpClient.readStringUntil('\r');
-    MYDEBUGPRINT(line);
-  }
-  MYDEBUGPRINTLN("closing connection?");
-#endif
-
-#endif // TCP_CLIENT_TRANSPARENT_BRIDGE_FOR_SERIALV
-
-
-#ifdef STREAM_1_STREAM_2_BRIDGE
-
-#ifdef STREAM_1_VIRT
-#define STREAM_1_AVAILABLE STREAM_1.alternative_available
-#define STREAM_1_READ STREAM_1.alternative_read
-#define STREAM_1_WRITE STREAM_1.alternative_write
-#else
-#define STREAM_1_AVAILABLE STREAM_1.available
-#define STREAM_1_READ STREAM_1.read
-#define STREAM_1_WRITE STREAM_1.write
-#endif
-
-#ifdef STREAM_2_VIRT
-#define STREAM_2_AVAILABLE STREAM_2.alternative_available
-#define STREAM_2_READ STREAM_2.alternative_read
-#define STREAM_2_WRITE STREAM_2.alternative_write
-#else
-#define STREAM_2_AVAILABLE STREAM_2.available
-#define STREAM_2_READ STREAM_2.read
-#define STREAM_2_WRITE STREAM_2.write
-#endif
-
-	//taskManager.scheduleFixedRate(1000, [] { // ms.
-	taskManager.scheduleFixedRate(50, [] { // ms. AAATEST
-	//menuTcmTimeSec.setCurrentValue(menuTcmTimeSec.getCurrentValue() + 1); // Avoid using another variable.
-
-#if(1) // AAATEST
-	// FROM STREAM_1 TO STREAM_2 ***********************************************************
-	//while (STREAM_1.alternative_available() > 0) { // could add timeout.
-	while (STREAM_1_AVAILABLE() > 0) { // possibly infinite loop AAATEST
-
-#ifdef DEF_BYTE_BY_BYTE
-		//char inChar = STREAM_1.alternative_read();
-		char inChar = STREAM_1_READ;
-		//STREAM_2.write(inChar);
-		STREAM_2_WRITE(inChar);
-#else
-		STREAM_1_TO_STREAM_2_Buf[STREAM_1_TO_STREAM_2_Idx] = STREAM_1_READ();
-		if (STREAM_1_TO_STREAM_2_Idx < (BUF_SIZE - 1)) {
-			STREAM_1_TO_STREAM_2_Idx++;
-		}
-		else
-			break;
-#endif
-	} // while internal reading
-		//Stream2.write(STREAM_1_TO_STREAM_2_Buf, STREAM_1_TO_STREAM_2_Idx); // AAATEST external writing
-		STREAM_2_WRITE(STREAM_1_TO_STREAM_2_Buf, STREAM_1_TO_STREAM_2_Idx); // AAATEST external writing
-		STREAM_1_TO_STREAM_2_Idx = 0; // reset index for next time.
-#endif // AAATEST
-
-#if(1) // AAATEST
-	// FROM STREAM_2 TO STREAM_1 ***********************************************************
-	//while (STREAM_2.available() > 0) { // could add timeout.
-	while (STREAM_2_AVAILABLE() > 0) { // could add timeout.
-
-#ifdef DEF_BYTE_BY_BYTE
-		//char c = STREAM_2.read();
-		char c = STREAM_2_READ();
-		//STREAM_1.alternative_write(c); // AAATEST
-		STREAM_1_WRITE(c); // AAATEST
-#else
-		//STREAM_2_TO_STREAM_1_Buf[STREAM_1_TO_STREAM_2_Idx] = STREAM_2.read();
-		STREAM_2_TO_STREAM_1_Buf[STREAM_1_TO_STREAM_2_Idx] = STREAM_2_READ();
-		if (STREAM_1_TO_STREAM_2_Idx < (BUF_SIZE - 1) ) {
-			STREAM_1_TO_STREAM_2_Idx++;
-		}
-		else
-			break;
-#endif
-	} // while external reading
-	//STREAM_1.alternative_write(STREAM_2_TO_STREAM_1_Buf, STREAM_1_TO_STREAM_2_Idx); // internal writing
-	STREAM_1_WRITE(STREAM_2_TO_STREAM_1_Buf, STREAM_1_TO_STREAM_2_Idx); // internal writing
-	STREAM_1_TO_STREAM_2_Idx = 0; // reset index for next time.
-#endif // AAATEST
-
-
-#if(0)
-		if(SERIALBT_TRANSPARENT_BRIDGE_FOR_SERIALZ){ // repeat
-
-			// serial comms between SerialBT and SERIALZ
-			//if (SerialBT.available()) {
-			while (SerialBT.available()) { // possible infinite loop.
-				SERIALZ.write(SerialBT.read());
-			}
-
-			while (SERIALZ.available()) { // possible infinite loop.
-				SerialBT.write(SERIALZ.read());
-			}
-		}
-#endif
-
-	}); // tail of taskManager.scheduleFixedRate ...
-#endif // COMMS_BRIDGE
-
-#endif // AAATEST
 
 
 #ifdef INIDEF_ETHERMEGA2560
@@ -994,6 +775,10 @@ static uint16_t STREAM_2_TO_STREAM_1_Idx = 0;
 
 
   myServoValve.attach(PIN_SERVO_AIR_VALVE);
+
+
+  myCommsHelper.configConnection();
+
 
 #ifdef INIDEF_ARDUINOOTA
 	// Port defaults to 3232
@@ -1052,7 +837,7 @@ void loop() {
 //	delay(10); // time allowance for background processing.
 
 #if(0)
-if(TCP_SERVER_TRANSPARENT_BRIDGE_FOR_SERIALV){
+if(TCP_SERVER_CONNECTIONV){
 
 	tcpServer.begin();
 
@@ -1122,32 +907,53 @@ void CALLBACK_FUNCTION onChangeTcmDebugLED(int id) {
 	debugLED(menuTcmDebugLED.getBoolean());
 }
 
+void CALLBACK_FUNCTION onChangeTcmLinearEncLaps(int id) {
+#ifdef DEF_TCM_OPERATIONAL
+#ifdef CONF_EXTRA_ENCODER2
+	TCWRotaryEncoder2->setCurrentReading( menuTcmLinearEncLaps.getCurrentValue() ); // Keep val synced w. diff UIs
+#endif
+#endif // ifndef DEF_TCM_OPERATIONAL
+}
+
+void CALLBACK_FUNCTION onChangeTcmLinearEncFine(int id) {
+#ifdef DEF_TCM_OPERATIONAL
+#ifdef CONF_EXTRA_ENCODER3
+	CCWRotaryEncoder3->setCurrentReading( menuTcmLinearEncFine.getCurrentValue() ); // Keep val synced w. diff UIs
+#endif
+#endif // ifndef DEF_TCM_OPERATIONAL
+}
 
 void CALLBACK_FUNCTION onChangeTcmCount1(int id) {
+#ifdef DEF_TCM_OPERATIONAL
 	//myCount1++;
-	myServoValve.write(menuTcmCount1.getIntValueIncludingOffset());
+	//myServoValve.write(menuTcmCount1.getIntValueIncludingOffset());
+#endif // ifndef DEF_TCM_OPERATIONAL
 }
 
 void CALLBACK_FUNCTION onChangeTcmCount2(int id) {
+#ifdef DEF_TCM_OPERATIONAL
 	// myCount2++;
+#endif // ifndef DEF_TCM_OPERATIONAL
 }
 
 void CALLBACK_FUNCTION onChangeTcmBaseCCW(int id) {
-#ifdef CONF_EXTRA_ENC3_CCW
-	CCWRotaryEncoder3->setCurrentReading( menuTcmBaseCCW.getCurrentValue() ); // Keep val synced w. diff UIs
-#endif
+#ifdef DEF_TCM_OPERATIONAL
+#endif // ifndef DEF_TCM_OPERATIONAL
 }
 
 void CALLBACK_FUNCTION onChangeTcmBaseTCW(int id) {
-#ifdef CONF_EXTRA_ENC2_TCW
-	TCWRotaryEncoder2->setCurrentReading( menuTcmBaseTCW.getCurrentValue() ); // Keep val synced w. diff UIs
-#endif
+#ifdef DEF_TCM_OPERATIONAL
+#endif // ifndef DEF_TCM_OPERATIONAL
 }
 
 void CALLBACK_FUNCTION onChangeTcmTimeSec(int id) {
+#ifdef DEF_TCM_OPERATIONAL
+#endif // ifndef DEF_TCM_OPERATIONAL
 }
 
-void CALLBACK_FUNCTION onChangeTcmRefreshMenu(int id) { refreshMenu(); }
+void CALLBACK_FUNCTION onChangeTcmRefreshMenu(int id) { 
+	refreshMenu(); 
+}
 
 
 void (* resetFunc) (void) = 0; // Arduino Forum alto777
