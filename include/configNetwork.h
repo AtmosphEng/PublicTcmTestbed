@@ -21,7 +21,7 @@ char ssid[] = ap_wayside_wifi_ssid;
 char pw[] = ap_wayside_wifi_pw;
 #endif
 
-#ifdef NETWORK_AP_ONBOARD_LINEAR_ENC // embedded target hosts its own access point.
+#ifdef NETWORK_AP_ONBOARD_LINEAR_ENC_APP_ACTIVE // embedded target hosts its own access point.
 char ssid[] = ap_onboard_wifi_ssid;
 char pw[] = ap_onboard_wifi_pw;
 #endif

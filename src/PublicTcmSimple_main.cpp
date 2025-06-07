@@ -414,7 +414,7 @@ void CALLBACK_FUNCTION onActivation(uint8_t pin, bool heldDown) { // tcMenu-swit
 		menuTcmLinearEncLaps.setCurrentValue(menuTcmLinearEncLaps.getCurrentValue() + 1); // inc value onboard linear enc
 
 		// menuTcmLinearEncFine.setCurrentValue(-2500); // AAAMAGIC reset count of incremental linear encoder to '0'.
-#if(1) // AAATEST
+#ifdef NETWORK_AP_ONBOARD_LINEAR_ENC_APP_RESET_COUNT_FINE
 		menuTcmLinearEncFine.setCurrentValue(2500); // AAAMAGIC reset count of incremental linear encoder to '0'.
 		CCWRotaryEncoder3->setCurrentReading(2500); // AAAMAGIC reset count of incremental linear encoder to '0'.
 #endif
