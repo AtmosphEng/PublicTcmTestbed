@@ -3,6 +3,7 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
+.backup/*.bak
 src/.backup/*.*
 src/generated/*.*
 src/ThemeDarkModeTraditionalBuilder.h

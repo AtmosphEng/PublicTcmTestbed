@@ -186,14 +186,14 @@ APA102<PIN_APA102_DI, PIN_APA102_CLK> ledStrip; // t-embed builtin RGB_LED
 #endif
 
 #ifdef CONF_EXTRA_ENCODER2
-HardwareRotaryEncoder *TCWRotaryEncoder2;
-#define DEF_TCM_TCW_ENCODER2	 menuTcmBaseTCW // ASSIGN ENCODER2 TO ANALOGMENUITEM.
+HardwareRotaryEncoder *RotaryEncoder2;
+#define DEF_ENCODER2	 menuTcmBaseTCW // ASSIGN ENCODER2 TO ANALOGMENUITEM.
 #define DEF_TCM_INDEX_ENCODER2 1							// Note - 1st encoder is tcmenu indexed as 0.
 #endif
 
 #ifdef CONF_EXTRA_ENCODER3
-HardwareRotaryEncoder *CCWRotaryEncoder3;
-#define DEF_TCM_CCW_ENCODER3	 menuTcmLinearEncFine // ASSIGN ENCODER3 TO ANALOGMENUITEM.
+HardwareRotaryEncoder *RotaryEncoder3;
+#define DEF_ENCODER3	 menuTcmLinearEncFine // ASSIGN ENCODER3 TO ANALOGMENUITEM.
 #define DEF_TCM_INDEX_ENCODER3 2										// Note - 1st encoder is tcmenu indexed as 0.
 #endif
 
@@ -408,15 +408,15 @@ void WiFiEvent(WiFiEvent_t event) {
 
 #ifdef DEF_TCM_OPERATIONAL // AAAFIXME here this means if SERVER with time source?
 // #ifdef MY_TCMENU_SWITCH_ONBOARD_LINEAR_ENCODER
-void CALLBACK_FUNCTION onActivation(uint8_t pin, bool heldDown) { // tcMenu-switches - if heldDown false, then action
+void CALLBACK_FUNCTION onActivationTcmSwitch(uint8_t pin, bool heldDown) { // tcMenu-switches - if heldDown false, then action
 	// if(heldDown == false){ // i.e. 'pressed' i.e. one activation regardless of pressing time. works as logic toggle.
 	if (heldDown == true) { // i.e. 'pressed' i.e. one activation regardless of pressing time. works as logic toggle.
-		menuTcmLinearEncLaps.setCurrentValue(menuTcmLinearEncLaps.getCurrentValue() + 1); // inc value onboard linear enc
+		menuTcmLinearEncLaps.setCurrentValue(menuTcmLinearEncLaps.getCurrentValue() + 1, true); // NOT HardwareRotaryEncoder
 
 		// menuTcmLinearEncFine.setCurrentValue(-2500); // AAAMAGIC reset count of incremental linear encoder to '0'.
 #ifdef NETWORK_AP_ONBOARD_LINEAR_ENC_APP_RESET_COUNT_FINE
-		menuTcmLinearEncFine.setCurrentValue(2500); // AAAMAGIC reset count of incremental linear encoder to '0'.
-		CCWRotaryEncoder3->setCurrentReading(2500); // AAAMAGIC reset count of incremental linear encoder to '0'.
+		menuTcmLinearEncFine.setCurrentValue(2500, true); // AAAMAGIC reset count of incremental linear encoder to '0'.
+		RotaryEncoder3->setCurrentReading(2500); // AAAMAGIC reset count of incremental linear encoder to '0'.
 #endif
 																								// delay(1000);
 		// vTaskDelay(1000/portTICK_PERIOD_MS); // TaskDelay of x millisec. AAAMAGIC
@@ -581,7 +581,7 @@ void setup() {
 	digitalWrite(PIN_LCD_BL, HIGH);
 #endif
 
-	myCommsHelper.configWifi();
+	myCommsHelper.setupWifi();
 
 #ifdef INIDEF_LILYGO_T_DISPLAY_S3
 	pinMode(PIN_POWER_ON, OUTPUT);
@@ -596,7 +596,7 @@ void setup() {
 #ifdef DEF_TCM_OPERATIONAL
 	// #ifdef MY_TCMENU_SWITCH_ONBOARD_LINEAR_ENCODER
 	switches.init(asIoRef(internalDigitalDevice()), SWITCHES_NO_POLLING, true); // use intr?(IOtype, read via, pull-up)
-	switches.addSwitch(PIN_ENC2_B, onActivation, NO_REPEAT); // tcMenu-switches NB tcMenu lib for ENC2 is NOT used here
+	switches.addSwitch(PIN_ENC2_B, onActivationTcmSwitch, NO_REPEAT); // tcMenu-switches NB tcMenu lib for ENC2 is NOT used here
 #endif
 
 #ifdef WIFI_BUILD
@@ -605,8 +605,9 @@ void setup() {
 	menuTcmTargetNum.setTextValue(ascii_id, false); // false means no callback.
 #endif
 
-#ifdef INIDEF_LILYGO_T_EMBED_S3
-	renderer.turnOffResetLogic(); // Turn off tcmenu cursor reset interval to prevent reset to root position.
+//#ifdef INIDEF_LILYGO_T_EMBED_S3
+#ifdef TCM_UI_LCD
+renderer.turnOffResetLogic(); // Turn off tcmenu cursor reset interval to prevent reset to root position.
 #endif
 
 #if defined(ARDUINO_ARCH_AVR) && !defined(INIDEF_UNO)
@@ -681,8 +682,13 @@ void setup() {
 
 #endif // defined(ARDUINO_ARCH_AVR) && !defined(INIDEF_UNO)
 
-#ifdef DEF_TCM_OPERATIONAL																								// do it on the client
-	taskManager.scheduleFixedRate(1000, [] {																// ms
+#ifdef DEF_TCM_OPERATIONAL																// do TCM display updates here ONLY - more runtime efficient
+	//taskManager.scheduleFixedRate(1000, [] {								// AAAMAGIC periodic update interval in ms
+	//taskManager.scheduleFixedRate(500, [] {								// AAAMAGIC periodic update interval in ms
+	taskManager.scheduleFixedRate(250, [] {								// AAAMAGIC periodic update interval in ms
+			debugLED(menuTcmDebugLED.getBoolean());
+		menuTcmLinearEncLaps.setCurrentValue(menuTcmLinearEncLaps.getCurrentValue()); // NOT HardwareRotaryEncoder
+		RotaryEncoder3->setCurrentReading(menuTcmLinearEncFine.getCurrentValue()); // Keep val synced w. diff UIs
 		menuTcmTimeSec.setCurrentValue(menuTcmTimeSec.getCurrentValue() + 1); // AAAMAGIC increment time.
 	});
 #endif // ifndef DEF_TCM_OPERATIONAL
@@ -697,36 +703,35 @@ void setup() {
 #endif
 
 #ifdef CONF_EXTRA_ENCODER2
-	pinMode(PIN_ENC2_A, INPUT_PULLUP); // for CCWRotaryEncoder2
+	pinMode(PIN_ENC2_A, INPUT_PULLUP); // for RotaryEncoder2
 	pinMode(PIN_ENC2_B, INPUT_PULLUP);
 	// pinMode(PIN_ENC2_OK, INPUT_PULLUP); // Not required.
 
-	TCWRotaryEncoder2 =
-			new HardwareRotaryEncoder // TCW
-																//	(PIN_IO44_ENC2_A_TCW_T7S3_B02_YELLOW,
-																// PIN_IO14_ENC2_B_TCW_ALSO_FSPI_WP_DUPLICATED_STEMMA_PIN3_T7S3_B03_GREEN,
-			(PIN_ENC2_B, PIN_ENC2_A, [](int valueEncoder2) {
+	RotaryEncoder2 = new HardwareRotaryEncoder
+			(PIN_ENC2_B, PIN_ENC2_A, 
+				[](int valueEncoder2) {
 				// no current action on the pushbutton switch press, change the menu using encoder rotation only.
-				DEF_TCM_TCW_ENCODER2.setCurrentValue(valueEncoder2);
+				DEF_ENCODER2.setCurrentValue(valueEncoder2);
 			});
-	TCWRotaryEncoder2->changePrecision(DEF_TCM_TCW_ENCODER2.getMaximumValue(), DEF_TCM_TCW_ENCODER2.getCurrentValue());
-	switches.setEncoder(DEF_TCM_INDEX_ENCODER2, TCWRotaryEncoder2); // Do not relocate this line.
+	RotaryEncoder2->changePrecision(DEF_ENCODER2.getMaximumValue(), DEF_ENCODER2.getCurrentValue());
+	switches.setEncoder(DEF_TCM_INDEX_ENCODER2, RotaryEncoder2); // Do not relocate this line.
 #endif
 
 #ifdef CONF_EXTRA_ENCODER3
-	pinMode(PIN_ENC3_A, INPUT_PULLUP); // for CCWRotaryEncoder2
+	pinMode(PIN_ENC3_A, INPUT_PULLUP); // for RotaryEncoder2
 	pinMode(PIN_ENC3_B, INPUT_PULLUP);
 	// pinMode(PIN_ENC3_OK, INPUT_PULLUP); // Not required.
 
-	CCWRotaryEncoder3 = new HardwareRotaryEncoder(
+	RotaryEncoder3 = new HardwareRotaryEncoder(
 			PIN_ENC3_B, PIN_ENC3_A,
 			[](int valueEncoder3) {
 				// no current action on the pushbutton switch press, change the menu using encoder rotation only.
-				DEF_TCM_CCW_ENCODER3.setCurrentValue(valueEncoder3);
+				// AAATEMP DEF_ENCODER3.setCurrentValue(valueEncoder3);
+				DEF_ENCODER3.setCurrentValue(valueEncoder3, true); // do NOT update the LCD.
 			},
 			HWACCEL_NONE); // last param assigns rotary encoder acceleration mode.
-	CCWRotaryEncoder3->changePrecision(DEF_TCM_CCW_ENCODER3.getMaximumValue(), DEF_TCM_CCW_ENCODER3.getCurrentValue());
-	switches.setEncoder(DEF_TCM_INDEX_ENCODER3, CCWRotaryEncoder3); // Do not relocate this line.
+	RotaryEncoder3->changePrecision(DEF_ENCODER3.getMaximumValue(), DEF_ENCODER3.getCurrentValue());
+	switches.setEncoder(DEF_TCM_INDEX_ENCODER3, RotaryEncoder3); // Do not relocate this line.
 #endif
 
 #ifdef INIDEF_ETHERMEGA2560
@@ -780,7 +785,7 @@ void setup() {
 
 	myServoValve.attach(PIN_SERVO_AIR_VALVE);
 
-	myCommsHelper.configConnection();
+	myCommsHelper.setupConnection();
 
 #ifdef INIDEF_ARDUINOOTA
 	// Port defaults to 3232
@@ -901,12 +906,12 @@ void loop() {
 
 // CALLBACK FUNCTION(s) *************************************************************************************
 
-void CALLBACK_FUNCTION onChangeTcmDebugLED(int id) { debugLED(menuTcmDebugLED.getBoolean()); }
+void CALLBACK_FUNCTION onChangeTcmDebugLED(int id) { /* AAATEMP debugLED(menuTcmDebugLED.getBoolean()); */ }
 
 void CALLBACK_FUNCTION onChangeTcmLinearEncLaps(int id) {
 #ifdef DEF_TCM_OPERATIONAL
 #ifdef CONF_EXTRA_ENCODER2
-	TCWRotaryEncoder2->setCurrentReading(menuTcmLinearEncLaps.getCurrentValue()); // Keep val synced w. diff UIs
+	RotaryEncoder2->setCurrentReading(menuTcmLinearEncLaps.getCurrentValue()); // Keep val synced w. diff UIs
 #endif
 #endif // ifndef DEF_TCM_OPERATIONAL
 }
@@ -914,7 +919,7 @@ void CALLBACK_FUNCTION onChangeTcmLinearEncLaps(int id) {
 void CALLBACK_FUNCTION onChangeTcmLinearEncFine(int id) {
 #ifdef DEF_TCM_OPERATIONAL
 #ifdef CONF_EXTRA_ENCODER3
-	CCWRotaryEncoder3->setCurrentReading(menuTcmLinearEncFine.getCurrentValue()); // Keep val synced w. diff UIs
+	// AAATEMP RotaryEncoder3->setCurrentReading(menuTcmLinearEncFine.getCurrentValue()); // Keep val synced w. diff UIs
 #endif
 #endif // ifndef DEF_TCM_OPERATIONAL
 }
@@ -947,7 +952,7 @@ void CALLBACK_FUNCTION onChangeTcmTimeSec(int id) {
 #endif // ifndef DEF_TCM_OPERATIONAL
 }
 
-void CALLBACK_FUNCTION onChangeTcmRefreshMenu(int id) { refreshMenu(); }
+void CALLBACK_FUNCTION onChangeTcmRefreshMenu(int id) { /* refreshMenu(); */ }
 
 void (*resetFunc)(void) = 0; // Arduino Forum alto777
 
@@ -956,7 +961,7 @@ void CALLBACK_FUNCTION onChangeTcmRestart(int id) {
 	// #ifndef INIDEF_ETHERMEGA2560
 	//	ESP.restart();
 	// #else
-	resetFunc();
+	// resetFunc(); if used, uncomment this line.
 	// #endif
 }
 
