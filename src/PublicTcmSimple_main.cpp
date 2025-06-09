@@ -202,7 +202,20 @@ Servo myServoValve; // create servo object to control a servo
 #ifdef WIFI_BUILD
 // #define BUF_SIZE 80
 #define BUF_SIZE 1024
+
+// STATIC(s)
 static uint8_t STREAM_2_TO_STREAM_1_Buf[BUF_SIZE];
+
+static int lastCount = 0;
+static int currentCount = 0;
+static int lastCountMax = 0;
+static int lastCountMin = 0;
+static bool currentDirectionTCW = true;
+static bool lastDirectionTCW = true;
+
+#define DEF_UI_DISPLAY_UPDATE_TENTHS_SEC 5 // 500 ms
+//#define DEF_UI_DISPLAY_UPDATE_TENTHS_SEC 10 // 1000 ms
+
 
 // WiFiClient tcpClient;
 #endif
@@ -406,21 +419,23 @@ void WiFiEvent(WiFiEvent_t event) {
 
 #endif
 
+#define DEF_LINEAR_ENC_FINE_OFFSET 400
 #ifdef DEF_TCM_OPERATIONAL // AAAFIXME here this means if SERVER with time source?
 // #ifdef MY_TCMENU_SWITCH_ONBOARD_LINEAR_ENCODER
-void CALLBACK_FUNCTION onActivationTcmSwitch(uint8_t pin, bool heldDown) { // tcMenu-switches - if heldDown false, then action
+void CALLBACK_FUNCTION onActivationTcmSwitch(uint8_t pin, bool heldDown) { // tcMenu-switches if heldDown false, action
+#if(0)
 	// if(heldDown == false){ // i.e. 'pressed' i.e. one activation regardless of pressing time. works as logic toggle.
 	if (heldDown == true) { // i.e. 'pressed' i.e. one activation regardless of pressing time. works as logic toggle.
 		menuTcmLinearEncLaps.setCurrentValue(menuTcmLinearEncLaps.getCurrentValue() + 1, true); // NOT HardwareRotaryEncoder
 
-		// menuTcmLinearEncFine.setCurrentValue(-2500); // AAAMAGIC reset count of incremental linear encoder to '0'.
 #ifdef NETWORK_AP_ONBOARD_LINEAR_ENC_APP_RESET_COUNT_FINE
-		menuTcmLinearEncFine.setCurrentValue(2500, true); // AAAMAGIC reset count of incremental linear encoder to '0'.
-		RotaryEncoder3->setCurrentReading(2500); // AAAMAGIC reset count of incremental linear encoder to '0'.
+		menuTcmLinearEncFine.setCurrentValue(DEF_LINEAR_ENC_FINE_OFFSET, true); // reset count of incr linear encoder to '0'
+		RotaryEncoder3->setCurrentReading(DEF_LINEAR_ENC_FINE_OFFSET); // reset count of incr linear encoder to '0'
 #endif
 																								// delay(1000);
 		// vTaskDelay(1000/portTICK_PERIOD_MS); // TaskDelay of x millisec. AAAMAGIC
 	}
+#endif
 }
 #endif
 
@@ -682,14 +697,57 @@ renderer.turnOffResetLogic(); // Turn off tcmenu cursor reset interval to preven
 
 #endif // defined(ARDUINO_ARCH_AVR) && !defined(INIDEF_UNO)
 
+
 #ifdef DEF_TCM_OPERATIONAL																// do TCM display updates here ONLY - more runtime efficient
 	//taskManager.scheduleFixedRate(1000, [] {								// AAAMAGIC periodic update interval in ms
 	//taskManager.scheduleFixedRate(500, [] {								// AAAMAGIC periodic update interval in ms
-	taskManager.scheduleFixedRate(250, [] {								// AAAMAGIC periodic update interval in ms
-			debugLED(menuTcmDebugLED.getBoolean());
-		menuTcmLinearEncLaps.setCurrentValue(menuTcmLinearEncLaps.getCurrentValue()); // NOT HardwareRotaryEncoder
+	taskManager.scheduleFixedRate((DEF_UI_DISPLAY_UPDATE_TENTHS_SEC * 100), [] {	// AAAMAGIC SCHEDULE CODE DURING LOOPING
+		
+		currentCount = menuTcmLinearEncFine.getCurrentValue() - 400; // AAAMAGIC convert from uint16_t to int. Update count.
+		MYDEBUGPRINT(lastCountMax);
+		MYDEBUGPRINT(",  ");
+		MYDEBUGPRINT(lastCountMin);
+		MYDEBUGPRINT(",  ");
+		MYDEBUGPRINT(currentCount);
+		MYDEBUGPRINT(",  ");
+		MYDEBUGPRINT(lastDirectionTCW);
+		MYDEBUGPRINT(",  ");
+		MYDEBUGPRINTLN(currentDirectionTCW);
+	
+		debugLED(menuTcmDebugLED.getBoolean());
 		RotaryEncoder3->setCurrentReading(menuTcmLinearEncFine.getCurrentValue()); // Keep val synced w. diff UIs
-		menuTcmTimeSec.setCurrentValue(menuTcmTimeSec.getCurrentValue() + 1); // AAAMAGIC increment time.
+		menuTcmLinearEncFine.setCurrentValue(menuTcmLinearEncFine.getCurrentValue()); // is this line redundant?
+		menuTcmTimeSec.setCurrentValue(menuTcmTimeSec.getCurrentValue() + DEF_UI_DISPLAY_UPDATE_TENTHS_SEC); // increment
+
+		if((lastCount < currentCount)){ // does lastCountMax need updating?
+				lastCountMax = currentCount; // update max value found.
+				currentDirectionTCW = true;
+				MYDEBUGPRINTLN("currentDirectionTCW is true");
+		}
+		else{
+			if((lastCount > currentCount)){
+				lastCountMin = currentCount; // AAAMAGIC tcm offset, update min value found.
+				currentDirectionTCW = false;
+				MYDEBUGPRINTLN("currentDirectionTCW is false");
+			}
+		}
+		lastCount = currentCount; // update
+
+		if(lastDirectionTCW != currentDirectionTCW){ // update UI display(s) once per (half)-lap i.e. TCW or CCW
+			lastDirectionTCW = currentDirectionTCW; // update
+			menuTcmLinearEncLaps.setCurrentValue(menuTcmLinearEncLaps.getCurrentValue() + 1); // NOT HardwareRotaryEncoder ENC2
+
+			if(currentDirectionTCW){
+				menuTcmLastCountCCW.setCurrentValue(lastCountMin + 400); // update OPPOSITE direction count to UI display
+				//lastCountMin = 0; // reset OPPOSITE direction count for next lap.
+			}
+			else{
+				menuTcmLastCountTCW.setCurrentValue(lastCountMax + 400); // update OPPOSITE direction count to UI display
+				//lastCountMax = 0; //  reset OPPOSITE direction count for next lap.
+		
+			}
+		}
+
 	});
 #endif // ifndef DEF_TCM_OPERATIONAL
 
