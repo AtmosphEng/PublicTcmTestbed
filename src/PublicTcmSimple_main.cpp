@@ -96,7 +96,7 @@ BluetoothSerial SerialBT;
 #endif
 
 #ifndef ARDUINO_ARCH_AVR
-#include "..\..\Credentials\Credentials.h"
+#include "../../projects/Credentials/Credentials.h"
 #endif
 
 #include <WiFi.h>
@@ -106,13 +106,12 @@ BluetoothSerial SerialBT;
 // WifiMode myWifiMode;
 // ConnType myConnType;
 
-// #include "myConfig.h"
-
 // #ifdef WIFI_BUILD
 #include "../../libraries/CommsHelper/src/commsHelper.h"
 CommsHelper myCommsHelper;
 
-#include "configNetwork.h"
+#include "../../libraries/CommsHelper/src/configNetwork.h" // now located at CommsHelper
+
 // #endif
 
 #if (0)
@@ -130,8 +129,7 @@ CommsHelper myCommsHelper;
 
 #define DEF_LED_DELAY		 500
 #define DEF_SERIAL_DELAY 100
-//#define NETWORK_AP_ONBOARD_LINEAR_ENC_APP_RESET_COUNT_FINE
-
+// #define NETWORK_AP_ONBOARD_LINEAR_ENC_APP_RESET_COUNT_FINE
 
 #ifdef ARDUINO_ARCH_AVR
 #include <Servo.h>
@@ -189,13 +187,13 @@ APA102<PIN_APA102_DI, PIN_APA102_CLK> ledStrip; // t-embed builtin RGB_LED
 
 #ifdef CONF_EXTRA_ENCODER2
 HardwareRotaryEncoder *RotaryEncoder2;
-#define DEF_ENCODER2	 menuTcmBaseTCW // ASSIGN ENCODER2 TO ANALOGMENUITEM.
+#define DEF_ENCODER2					 menuTcmBaseTCW // ASSIGN ENCODER2 TO ANALOGMENUITEM.
 #define DEF_TCM_INDEX_ENCODER2 1							// Note - 1st encoder is tcmenu indexed as 0.
 #endif
 
 #ifdef CONF_EXTRA_ENCODER3
 HardwareRotaryEncoder *RotaryEncoder3;
-#define DEF_ENCODER3	 menuTcmLinearEncFine // ASSIGN ENCODER3 TO ANALOGMENUITEM.
+#define DEF_ENCODER3					 menuTcmLinearEncFine // ASSIGN ENCODER3 TO ANALOGMENUITEM.
 #define DEF_TCM_INDEX_ENCODER3 2										// Note - 1st encoder is tcmenu indexed as 0.
 #endif
 
@@ -213,9 +211,10 @@ static int currentCount = 0;
 static int lastCountMax = 0;
 static int lastCountMin = 0;
 static int speedCountsPerSec = 0;
+static int clientLoops = 0;
+
 static bool currentDirectionTCW = true;
 static bool lastDirectionTCW = true;
-
 
 // WiFiClient tcpClient;
 #endif
@@ -422,32 +421,36 @@ void WiFiEvent(WiFiEvent_t event) {
 #ifdef DEF_TCM_OPERATIONAL // AAAFIXME here this means if SERVER with time source?
 // #ifdef MY_TCMENU_SWITCH_ONBOARD_LINEAR_ENCODER
 
-void CALLBACK_FUNCTION onActivationTcmSwitch(uint8_t pin, bool heldDown) { 
+void CALLBACK_FUNCTION onActivationTcmSwitch(uint8_t pin, bool heldDown) {
 	// tcMenu-switches if heldDown false, then action is once only on active to non-active edge trasition ?
-#if(0)
-	if(heldDown == false){ // i.e. 'pressed' i.e. one activation regardless of pressing time. works as logic toggle ?
-	//if (heldDown == true) { // i.e. 'pressed' i.e. one activation regardless of pressing time. works as logic toggle ?
-		menuTcmLinearEncLaps.setCurrentValue(menuTcmLinearEncLaps.getCurrentValue() + 1, false); // NOT HardwareRotaryEncoder
+#if (0)
+	if (heldDown == false) { // i.e. 'pressed' i.e. one activation regardless of pressing time. works as logic toggle ?
+		// if (heldDown == true) { // i.e. 'pressed' i.e. one activation regardless of pressing time. works as logic toggle
+		// ?
+		menuTcmLinearEncLaps.setCurrentValue(menuTcmLinearEncLaps.getCurrentValue() + 1,
+																				 false); // NOT HardwareRotaryEncoder
 
 #ifdef NETWORK_AP_ONBOARD_LINEAR_ENC_APP_RESET_COUNT_FINE
-	//if(1){
-	//if((menuTcmLinearEncLaps.getCurrentValue() % 2)){ // Use modulo two to only reset lap position if lap number is ODD.
-	if(heldDown == false){ // i.e. 'pressed' i.e. one activation regardless of pressing time. works as logic toggle ?
-		//menuTcmLastCountCCW.setCurrentValue(menuTcmLinearEncFine.getCurrentValue(), false); // disp last MAX position count
+		// if(1){
+		// if((menuTcmLinearEncLaps.getCurrentValue() % 2)){ // Use modulo two to only reset lap position if lap number is
+		// ODD.
+		if (heldDown == false) { // i.e. 'pressed' i.e. one activation regardless of pressing time. works as logic toggle ?
+			// menuTcmLastCountCCW.setCurrentValue(menuTcmLinearEncFine.getCurrentValue(), false); // disp last MAX position
+			// count
 
-		menuTcmLinearEncFine.setCurrentValue(-menuTcmLinearEncFine.getOffset(), false); // reset count of incr linear encoder
-		RotaryEncoder3->setCurrentReading(-menuTcmLinearEncFine.getOffset()); // reset count of incr linear encoder to '0'
+			menuTcmLinearEncFine.setCurrentValue(-menuTcmLinearEncFine.getOffset(),
+																					 false);													// reset count of incr linear encoder
+			RotaryEncoder3->setCurrentReading(-menuTcmLinearEncFine.getOffset()); // reset count of incr linear encoder to '0'
 
-	}
-	else{
-		//menuTcmLastCountTCW.setCurrentValue(menuTcmLinearEncFine.getCurrentValue()); // display last MINimum position count
-
-	}
+		} else {
+			// menuTcmLastCountTCW.setCurrentValue(menuTcmLinearEncFine.getCurrentValue()); // display last MINimum position
+			// count
+		}
 #endif
-																								// delay(1000);
+		// delay(1000);
 		// vTaskDelay(1000/portTICK_PERIOD_MS); // TaskDelay of x millisec. AAAMAGIC
 
-	}  // if (heldDown == true)
+	} // if (heldDown == true)
 #endif
 }
 #endif
@@ -633,13 +636,13 @@ void setup() {
 	menuTcmTargetNum.setTextValue(ascii_id, false); // false means no callback.
 #endif
 
-//#ifdef INIDEF_LILYGO_T_EMBED_S3
+// #ifdef INIDEF_LILYGO_T_EMBED_S3
 #ifdef TCM_UI_LCD
-renderer.turnOffResetLogic(); // Turn off tcmenu cursor reset interval to prevent reset to root position.
+	renderer.turnOffResetLogic(); // Turn off tcmenu cursor reset interval to prevent reset to root position.
 #endif
 
 #if defined(ARDUINO_ARCH_AVR) && !defined(INIDEF_UNO)
-	// digitalWrite(IO_PIN_53, OUTPUT); // Mega Slave Select (SS)
+																// digitalWrite(IO_PIN_53, OUTPUT); // Mega Slave Select (SS)
 
 	digitalWrite(PIN_DUMMY_GROUND_D20, LOW); // For wiring convenience on Mega for Serial1 cable with adjacent ground
 	pinMode(PIN_DUMMY_GROUND_D20, OUTPUT);
@@ -710,13 +713,9 @@ renderer.turnOffResetLogic(); // Turn off tcmenu cursor reset interval to preven
 
 #endif // defined(ARDUINO_ARCH_AVR) && !defined(INIDEF_UNO)
 
-
-#ifdef DEF_TCM_OPERATIONAL																// do TCM display updates here ONLY - more runtime efficient
-	//taskManager.scheduleFixedRate(1000, [] {								// AAAMAGIC periodic update interval in ms
-	//taskManager.scheduleFixedRate(500, [] {								// AAAMAGIC periodic update interval in ms
-	taskManager.scheduleFixedRate(DEF_PROCESS_UPDATE_MSEC, [] {	// AAAMAGIC SCHEDULE CODE DURING LOOPING
-		
-		currentCount = menuTcmLinearEncFine.getCurrentValue() + menuTcmLinearEncFine.getOffset() ; // Update count
+#ifdef DEF_TCM_OPERATIONAL // SERVER - do TCM display updates here ONLY - more runtime efficient
+	taskManager.scheduleFixedRate(DEF_PROCESS_UPDATE_MSEC, [] { //  SCHEDULE CODE DURING LOOPING
+		currentCount = menuTcmLinearEncFine.getCurrentValue() + menuTcmLinearEncFine.getOffset(); // Update count
 		MYDEBUGPRINT(lastCountMax);
 		MYDEBUGPRINT(",  ");
 		MYDEBUGPRINT(lastCountMin);
@@ -726,22 +725,21 @@ renderer.turnOffResetLogic(); // Turn off tcmenu cursor reset interval to preven
 		MYDEBUGPRINT(lastDirectionTCW);
 		MYDEBUGPRINT(",  ");
 		MYDEBUGPRINTLN(currentDirectionTCW);
-	
+
 		debugLED(menuTcmDebugLED.getBoolean());
-		RotaryEncoder3->setCurrentReading(menuTcmLinearEncFine.getCurrentValue()); // Keep val synced w. diff UIs
+		RotaryEncoder3->setCurrentReading(menuTcmLinearEncFine.getCurrentValue());		// Keep val synced w. diff UIs
 		menuTcmLinearEncFine.setCurrentValue(menuTcmLinearEncFine.getCurrentValue()); // is this line redundant?
 		menuTcmTimeSec.setCurrentValue(menuTcmTimeSec.getCurrentValue() + (DEF_PROCESS_UPDATE_MSEC / 100)); // conv sec/10
 
 		speedCountsPerSec = (currentCount - lastCount) * (1000 / DEF_PROCESS_UPDATE_MSEC); // conv to PerSec.
 		menuTcmSpeed.setCurrentValue(speedCountsPerSec - menuTcmSpeed.getOffset()); // tcm offset for neg integer display.
 
-		if((lastCount < currentCount)){ // does lastCountMax need updating?
-				lastCountMax = currentCount; // update max value found.
-				currentDirectionTCW = true;
-				MYDEBUGPRINTLN("currentDirectionTCW is true");
-		}
-		else{
-			if((lastCount > currentCount)){
+		if ((lastCount < currentCount)) { // does lastCountMax need updating?
+			lastCountMax = currentCount;		// update max value found.
+			currentDirectionTCW = true;
+			MYDEBUGPRINTLN("currentDirectionTCW is true");
+		} else {
+			if ((lastCount > currentCount)) {
 				lastCountMin = currentCount; // AAAMAGIC tcm offset, update min value found.
 				currentDirectionTCW = false;
 				MYDEBUGPRINTLN("currentDirectionTCW is false");
@@ -749,29 +747,49 @@ renderer.turnOffResetLogic(); // Turn off tcmenu cursor reset interval to preven
 		}
 		lastCount = currentCount; // update
 
-#if(1)		
-		if(lastDirectionTCW != currentDirectionTCW){ // update UI display(s) once per (half)-lap i.e. TCW or CCW
-			lastDirectionTCW = currentDirectionTCW; // update
-			menuTcmLinearEncLaps.setCurrentValue(menuTcmLinearEncLaps.getCurrentValue() + 1); // NOT HardwareRotaryEncoder ENC2
+#if (1)
+		if (lastDirectionTCW != currentDirectionTCW) { // update UI display(s) once per (half)-lap i.e. TCW or CCW
+			lastDirectionTCW = currentDirectionTCW;			 // update
+			menuTcmLinearEncLaps.setCurrentValue(menuTcmLinearEncLaps.getCurrentValue() +
+																					 1); // NOT HardwareRotaryEncoder ENC2
 
-			if(currentDirectionTCW){
-				menuTcmLastCountCCW.setCurrentValue(lastCountMin - menuTcmLastCountCCW.getOffset()); // update OPPOSITE direction count to UI display
+			if (currentDirectionTCW) {
+				menuTcmLastCountCCW.setCurrentValue(
+						lastCountMin - menuTcmLastCountCCW.getOffset()); // update OPPOSITE direction count to UI display
 
 				lastCountMin = 0; // thack is taped BLACK at this end, so FORCE reset OPPOSITE direction count for next lap.
-				menuTcmLinearEncFine.setCurrentValue(-menuTcmLinearEncFine.getOffset(), false); // reset count of incr linear encoder
-				RotaryEncoder3->setCurrentReading(-menuTcmLinearEncFine.getOffset()); // reset count of incr linear encoder to '0'
+				menuTcmLinearEncFine.setCurrentValue(-menuTcmLinearEncFine.getOffset(),
+																						 false); // reset count of incr linear encoder
+				RotaryEncoder3->setCurrentReading(
+						-menuTcmLinearEncFine.getOffset()); // reset count of incr linear encoder to '0'
 
-			}
-			else{ // current direction is CCW
-				menuTcmLastCountTCW.setCurrentValue(lastCountMax - menuTcmLastCountCCW.getOffset()); // update OPPOSITE direction count to UI display
-				//lastCountMax = 0; //  reset OPPOSITE direction count for next lap.
-
+			} else { // current direction is CCW
+				menuTcmLastCountTCW.setCurrentValue(
+						lastCountMax - menuTcmLastCountCCW.getOffset()); // update OPPOSITE direction count to UI display
+				// lastCountMax = 0; //  reset OPPOSITE direction count for next lap.
 			}
 		}
 #endif
 
-	});
-#endif // ifndef DEF_TCM_OPERATIONAL
+	}); // taskManager
+
+#else // CLIENT
+
+	taskManager.scheduleFixedRate(DEF_PROCESS_UPDATE_MSEC, [] { //  SCHEDULE CODE DURING LOOPING
+		// Serial.print("Min:-10, Max:70, ");
+		Serial.print(
+				"-10, 60, "); // always plot min and max constants to prevent serial plotter from auto scaling in y-axis
+		Serial.print((menuTcmLinearEncFine.getCurrentValue() + menuTcmLinearEncFine.getOffset()));
+
+		// Serial.print(",");
+		// Serial.print(clientLoops % 70); // for serial print and plot testing. Linear ramp indicates no missing data.
+
+		Serial.println();
+		clientLoops++;
+
+	}); // taskManager
+
+#endif // DEF_TCM_OPERATIONAL
 
 #if (0)
 #define DEF_TCM_SERIAL_XOVER_SYNC_ONCE
@@ -787,12 +805,10 @@ renderer.turnOffResetLogic(); // Turn off tcmenu cursor reset interval to preven
 	pinMode(PIN_ENC2_B, INPUT_PULLUP);
 	// pinMode(PIN_ENC2_OK, INPUT_PULLUP); // Not required.
 
-	RotaryEncoder2 = new HardwareRotaryEncoder
-			(PIN_ENC2_B, PIN_ENC2_A, 
-				[](int valueEncoder2) {
-				// no current action on the pushbutton switch press, change the menu using encoder rotation only.
-				DEF_ENCODER2.setCurrentValue(valueEncoder2);
-			});
+	RotaryEncoder2 = new HardwareRotaryEncoder(PIN_ENC2_B, PIN_ENC2_A, [](int valueEncoder2) {
+		// no current action on the pushbutton switch press, change the menu using encoder rotation only.
+		DEF_ENCODER2.setCurrentValue(valueEncoder2);
+	});
 	RotaryEncoder2->changePrecision(DEF_ENCODER2.getMaximumValue(), DEF_ENCODER2.getCurrentValue());
 	switches.setEncoder(DEF_TCM_INDEX_ENCODER2, RotaryEncoder2); // Do not relocate this line.
 #endif
