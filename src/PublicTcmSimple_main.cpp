@@ -106,11 +106,12 @@ BluetoothSerial SerialBT;
 // WifiMode myWifiMode;
 // ConnType myConnType;
 
-// #ifdef WIFI_BUILD
+#include "../../libraries/CommsHelper/src/myConfigApp.h" // now located at CommsHelper
+#include "../../libraries/CommsHelper/src/myConfigGeneral.h" // now located at CommsHelper
+//#include "../../libraries/CommsHelper/src/myConfigNetwork.h" // now located at CommsHelper
+
 #include "../../libraries/CommsHelper/src/commsHelper.h"
 CommsHelper myCommsHelper;
-
-#include "../../libraries/CommsHelper/src/configNetwork.h" // now located at CommsHelper
 
 // #endif
 
@@ -211,7 +212,6 @@ static int currentCount = 0;
 static int lastCountMax = 0;
 static int lastCountMin = 0;
 static int speedCountsPerSec = 0;
-static int clientLoops = 0;
 
 static bool currentDirectionTCW = true;
 static bool lastDirectionTCW = true;
@@ -507,7 +507,7 @@ void setup() {
 #ifdef MYSERIAL2_BEGIN
 	MYSERIAL2_BEGIN;
 	delay(DEF_SERIAL_DELAY); // Need time here?
-#if (1)
+#if (0)
 	Serial2.println("Hello from Serial2");
 	Serial2.println("Hello from Serial2");
 	Serial2.println("Hello from Serial2");
@@ -775,19 +775,24 @@ void setup() {
 
 #else // CLIENT
 
+#if(1)
+	static int clientLoops = 0;
+#define MY_SERIAL_PLOTTER Serial2	
+
 	taskManager.scheduleFixedRate(DEF_PROCESS_UPDATE_MSEC, [] { //  SCHEDULE CODE DURING LOOPING
-		// Serial.print("Min:-10, Max:70, ");
-		Serial.print(
+		// MY_SERIAL_PLOTTER.print("Min:-10, Max:70, ");
+		MY_SERIAL_PLOTTER.print(
 				"-10, 60, "); // always plot min and max constants to prevent serial plotter from auto scaling in y-axis
-		Serial.print((menuTcmLinearEncFine.getCurrentValue() + menuTcmLinearEncFine.getOffset()));
+		MY_SERIAL_PLOTTER.print((menuTcmLinearEncFine.getCurrentValue() + menuTcmLinearEncFine.getOffset()));
 
-		// Serial.print(",");
-		// Serial.print(clientLoops % 70); // for serial print and plot testing. Linear ramp indicates no missing data.
+		// MY_SERIAL_PLOTTER.print(",");
+		// MY_SERIAL_PLOTTER.print(clientLoops % 70); // for serial print and plot testing. Linear ramp indicates no missing data.
 
-		Serial.println();
+		MY_SERIAL_PLOTTER.println();
 		clientLoops++;
 
 	}); // taskManager
+#endif
 
 #endif // DEF_TCM_OPERATIONAL
 
