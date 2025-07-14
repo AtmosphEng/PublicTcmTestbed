@@ -106,9 +106,9 @@ BluetoothSerial SerialBT;
 // WifiMode myWifiMode;
 // ConnType myConnType;
 
-#include "../../libraries/CommsHelper/src/myConfigApp.h" // now located at CommsHelper
-#include "../../libraries/CommsHelper/src/myConfigGeneral.h" // now located at CommsHelper
-//#include "../../libraries/CommsHelper/src/myConfigNetwork.h" // now located at CommsHelper
+#include "../../libraries/MyShared/src/myConfigApp.h"
+#include "../../libraries/MyShared/src/myConfigGeneral.h"
+//#include "../../libraries/MyShared/src/myConfigNetwork.h"
 
 #include "../../libraries/CommsHelper/src/commsHelper.h"
 CommsHelper myCommsHelper;
@@ -121,7 +121,7 @@ CommsHelper myCommsHelper;
 #define MYSERIALX Serial1
 // #define MYSERIALX Serial2
 #endif
-#include "../../libraries/MyDebug/src/myDebugPrint.h"
+#include "../../libraries/MyShared/src/myDebugPrint.h"
 
 #define BAUD_SERIAL			 (115200)
 #define BAUD_SERIAL0		 (115200)
@@ -757,7 +757,7 @@ void setup() {
 				menuTcmLastCountCCW.setCurrentValue(
 						lastCountMin - menuTcmLastCountCCW.getOffset()); // update OPPOSITE direction count to UI display
 
-				lastCountMin = 0; // thack is taped BLACK at this end, so FORCE reset OPPOSITE direction count for next lap.
+				lastCountMin = 0; // track is taped BLACK at this end, so FORCE reset OPPOSITE direction count for next lap.
 				menuTcmLinearEncFine.setCurrentValue(-menuTcmLinearEncFine.getOffset(),
 																						 false); // reset count of incr linear encoder
 				RotaryEncoder3->setCurrentReading(
@@ -777,13 +777,14 @@ void setup() {
 
 #if(1)
 	static int clientLoops = 0;
-#define MY_SERIAL_PLOTTER Serial2	
+#define MY_SERIAL_PLOTTER Serial2	// to suit lilygo t-display-s3 pin availability.
 
 	taskManager.scheduleFixedRate(DEF_PROCESS_UPDATE_MSEC, [] { //  SCHEDULE CODE DURING LOOPING
 		// MY_SERIAL_PLOTTER.print("Min:-10, Max:70, ");
-		MY_SERIAL_PLOTTER.print(
-				"-10, 60, "); // always plot min and max constants to prevent serial plotter from auto scaling in y-axis
-		MY_SERIAL_PLOTTER.print((menuTcmLinearEncFine.getCurrentValue() + menuTcmLinearEncFine.getOffset()));
+		// MY_SERIAL_PLOTTER.print("-10, 60, "); // always plot min and max to prevent serial plotter auto scaling y-axis.
+		MY_SERIAL_PLOTTER.print((menuTcmLinearEncFine.getCurrentValue() + menuTcmLinearEncFine.getOffset() + 10));//AAAMAGIC
+		MY_SERIAL_PLOTTER.print(","); // AAMAGIC Arduino Serial Plotter value delimiter (comma).
+		MY_SERIAL_PLOTTER.print((abs(menuTcmSpeed.getCurrentValue() + menuTcmSpeed.getOffset()))); // use abs() to make pos
 
 		// MY_SERIAL_PLOTTER.print(",");
 		// MY_SERIAL_PLOTTER.print(clientLoops % 70); // for serial print and plot testing. Linear ramp indicates no missing data.

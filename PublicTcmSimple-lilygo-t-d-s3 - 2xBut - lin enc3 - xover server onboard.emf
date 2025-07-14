@@ -195,7 +195,7 @@
       "type": "analogItem",
       "defaultValue": "0",
       "item": {
-        "maxValue": 32000,
+        "maxValue": 65535,
         "offset": 0,
         "divisor": 1,
         "unitName": "",
@@ -417,7 +417,7 @@
     ],
     "lastThemeUuid": "e4524028-edd8-4e0a-ae15-a1f2ba05354f",
     "applicationUUID": "f1cdf4ed-8d8f-469e-b907-91c3e1536fab",
-    "applicationName": "PTcSrv 250701 2010",
+    "applicationName": "PTcSrv 250713 1613",
     "lastProperties": [
       {
         "name": "DISPLAY_VARIABLE",
