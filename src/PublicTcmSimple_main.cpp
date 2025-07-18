@@ -211,7 +211,7 @@ static int lastCount = 0;
 static int currentCount = 0;
 static int lastCountMax = 0;
 static int lastCountMin = 0;
-static int speedCountsPerSec = 0;
+static int speedCountsPerPInterval = 0;
 
 static bool currentDirectionTCW = true;
 static bool lastDirectionTCW = true;
@@ -714,7 +714,7 @@ void setup() {
 #endif // defined(ARDUINO_ARCH_AVR) && !defined(INIDEF_UNO)
 
 #ifdef DEF_TCM_OPERATIONAL // SERVER - do TCM display updates here ONLY - more runtime efficient
-	taskManager.scheduleFixedRate(DEF_PROCESS_UPDATE_MSEC, [] { //  SCHEDULE CODE DURING LOOPING
+	taskManager.scheduleFixedRate(DEF_ProcessIntervalMSec, [] { //  SCHEDULE CODE DURING LOOPING
 		currentCount = menuTcmLinearEncFine.getCurrentValue() + menuTcmLinearEncFine.getOffset(); // Update count
 		MYDEBUGPRINT(lastCountMax);
 		MYDEBUGPRINT(",  ");
@@ -729,10 +729,10 @@ void setup() {
 		debugLED(menuTcmDebugLED.getBoolean());
 		RotaryEncoder3->setCurrentReading(menuTcmLinearEncFine.getCurrentValue());		// Keep val synced w. diff UIs
 		menuTcmLinearEncFine.setCurrentValue(menuTcmLinearEncFine.getCurrentValue()); // is this line redundant?
-		menuTcmTimeSec.setCurrentValue(menuTcmTimeSec.getCurrentValue() + (DEF_PROCESS_UPDATE_MSEC / 100)); // conv sec/10
+		menuTcmTimeSec.setCurrentValue(menuTcmTimeSec.getCurrentValue() + (DEF_ProcessIntervalMSec / 100)); // conv sec/10
 
-		speedCountsPerSec = (currentCount - lastCount) * (1000 / DEF_PROCESS_UPDATE_MSEC); // conv to PerSec.
-		menuTcmSpeed.setCurrentValue(speedCountsPerSec - menuTcmSpeed.getOffset()); // tcm offset for neg integer display.
+		speedCountsPerPInterval = currentCount - lastCount;
+		menuTcmSpeed.setCurrentValue(speedCountsPerPInterval - menuTcmSpeed.getOffset()); // offs for neg AnalogMenuItem.
 
 		if ((lastCount < currentCount)) { // does lastCountMax need updating?
 			lastCountMax = currentCount;		// update max value found.
@@ -779,7 +779,7 @@ void setup() {
 	static int clientLoops = 0;
 #define MY_SERIAL_PLOTTER Serial2	// to suit lilygo t-display-s3 pin availability.
 
-	taskManager.scheduleFixedRate(DEF_PROCESS_UPDATE_MSEC, [] { //  SCHEDULE CODE DURING LOOPING
+	taskManager.scheduleFixedRate(DEF_ProcessIntervalMSec, [] { //  SCHEDULE CODE DURING LOOPING
 		// MY_SERIAL_PLOTTER.print("Min:-10, Max:70, ");
 		// MY_SERIAL_PLOTTER.print("-10, 60, "); // always plot min and max to prevent serial plotter auto scaling y-axis.
 		MY_SERIAL_PLOTTER.print((menuTcmLinearEncFine.getCurrentValue() + menuTcmLinearEncFine.getOffset() + 10));//AAAMAGIC
