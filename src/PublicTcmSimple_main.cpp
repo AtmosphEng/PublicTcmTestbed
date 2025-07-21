@@ -790,6 +790,9 @@ void setup() {
 		// MY_SERIAL_PLOTTER.print(clientLoops % 70); // for serial print and plot testing. Linear ramp indicates no missing data.
 
 		MY_SERIAL_PLOTTER.println();
+
+		MY_SERIAL_PLOTTER.flush(true); // flush txOnly. To fix non-zero travelCar speed when stopped at end of lap ?
+
 		clientLoops++;
 
 	}); // taskManager
